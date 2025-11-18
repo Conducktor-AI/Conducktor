@@ -31,7 +31,8 @@ Connect your AI application (ChatGPT, Claude, etc.) to Conducktor:
 https://api.conducktor.com/api/conducktor-mcp
 
 # Authentication
-OAuth 2.0 with Client ID: chatgpt-mcp-client
+OAuth 2.0 with Dynamic Client Registration (RFC 7591)
+# Client credentials provided during partnership onboarding
 ```
 
 See our [ChatGPT Integration Guide](docs/integrations/CHATGPT.md) for step-by-step instructions.

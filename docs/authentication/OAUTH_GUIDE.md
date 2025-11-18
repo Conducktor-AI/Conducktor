@@ -8,6 +8,8 @@ This guide is for service providers who want to integrate their MCP server with 
 
 OAuth 2.1 is the modern authorization standard that consolidates best practices from OAuth 2.0 and adds mandatory security features. Conducktor requires OAuth 2.1 with PKCE for all third-party MCP server integrations.
 
+**For AI applications connecting TO Conducktor:** We support RFC 7591 Dynamic Client Registration, allowing automatic OAuth client provisioning without manual onboarding.
+
 ### Why OAuth 2.1 + PKCE?
 
 **Security Benefits:**
@@ -408,37 +410,115 @@ def revoke_token(request):
     return {"status": "revoked"}, 200
 ```
 
-## Dynamic Client Registration (RFC 7591) - Optional
+## Dynamic Client Registration (RFC 7591) - Recommended
 
-Allow Conducktor to automatically register OAuth clients:
+### Conducktor's Client Registration Endpoint
 
-**Endpoint:** `POST /oauth/register`
+Conducktor supports RFC 7591 Dynamic Client Registration for AI applications. This allows automatic OAuth client provisioning without manual partner onboarding.
 
-**Request:**
+**Endpoint:** `POST https://api.conducktor.com/api/oauth/register`
+
+**Authentication:** None required for initial registration (rate-limited by IP)
+
+**Request Body:**
 ```json
 {
-  "client_name": "Conducktor",
-  "redirect_uris": ["https://app.conducktor.com/oauth/callback"],
+  "client_name": "ChatGPT Integration - Acme Corp",
+  "redirect_uris": [
+    "https://chatgpt.com/oauth/callback",
+    "https://your-app.com/oauth/callback"
+  ],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
-  "scope": "read write",
-  "token_endpoint_auth_method": "client_secret_post"
+  "scope": "mcp:tools mcp:read mcp:write",
+  "token_endpoint_auth_method": "client_secret_post",
+  "contacts": ["admin@acme.com"],
+  "logo_uri": "https://acme.com/logo.png",
+  "policy_uri": "https://acme.com/privacy",
+  "tos_uri": "https://acme.com/terms"
 }
 ```
 
-**Response:**
+**Field Requirements:**
+- `client_name` (required): Human-readable application name, shown to users during authorization
+- `redirect_uris` (required): Array of valid redirect URIs (must be HTTPS in production)
+- `grant_types` (optional): Defaults to `["authorization_code", "refresh_token"]`
+- `response_types` (optional): Defaults to `["code"]`
+- `scope` (optional): Space-separated scopes. Available: `mcp:tools`, `mcp:read`, `mcp:write`
+- `token_endpoint_auth_method` (optional): `client_secret_post` or `client_secret_basic`
+- `contacts` (optional): Admin email addresses for notifications
+- `logo_uri` (optional): Logo displayed during OAuth consent
+- `policy_uri` (optional): Link to your privacy policy
+- `tos_uri` (optional): Link to your terms of service
+
+**Success Response (201 Created):**
 ```json
 {
-  "client_id": "auto_generated_client_id",
-  "client_secret": "auto_generated_secret",
+  "client_id": "conducktor_a1b2c3d4e5f6",
+  "client_secret": "sk_live_9z8y7x6w5v4u3t2s1r0q",
   "client_id_issued_at": 1700000000,
   "client_secret_expires_at": 0,
-  "redirect_uris": ["https://app.conducktor.com/oauth/callback"],
+  "client_name": "ChatGPT Integration - Acme Corp",
+  "redirect_uris": [
+    "https://chatgpt.com/oauth/callback",
+    "https://your-app.com/oauth/callback"
+  ],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
-  "scope": "read write"
+  "scope": "mcp:tools mcp:read mcp:write",
+  "token_endpoint_auth_method": "client_secret_post",
+  "registration_access_token": "reg_token_for_client_updates",
+  "registration_client_uri": "https://api.conducktor.com/api/oauth/register/conducktor_a1b2c3d4e5f6"
 }
 ```
+
+**Error Responses:**
+
+400 Bad Request:
+```json
+{
+  "error": "invalid_redirect_uri",
+  "error_description": "Redirect URI must use HTTPS in production"
+}
+```
+
+429 Too Many Requests:
+```json
+{
+  "error": "rate_limit_exceeded",
+  "error_description": "Maximum 10 registrations per hour per IP",
+  "retry_after": 3600
+}
+```
+
+**Security Features:**
+- Client secrets are cryptographically secure (32+ bytes entropy)
+- Rate limiting: 10 registrations per hour per IP address
+- Redirect URI validation: Must match exactly during authorization
+- Client secrets never returned again (store securely on first registration)
+- Registration access tokens allow client metadata updates
+
+**Example cURL:**
+```bash
+curl -X POST https://api.conducktor.com/api/oauth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_name": "My AI Application",
+    "redirect_uris": ["https://myapp.com/oauth/callback"],
+    "scope": "mcp:tools mcp:read"
+  }'
+```
+
+**Client Lifecycle Management:**
+
+1. **Registration** - POST /oauth/register (returns client credentials)
+2. **Read Metadata** - GET /oauth/register/{client_id} (requires registration_access_token)
+3. **Update Metadata** - PUT /oauth/register/{client_id} (update redirect_uris, name, etc.)
+4. **Revocation** - DELETE /oauth/register/{client_id} (permanently delete client)
+
+### For MCP Server Providers
+
+If you're building an MCP server that integrates with Conducktor, you should also support dynamic client registration to allow Conducktor to automatically register OAuth clients when users connect your service.
 
 ## Security Best Practices
 

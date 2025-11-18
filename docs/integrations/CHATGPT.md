@@ -34,7 +34,37 @@ This endpoint provides access to:
 - Conducktor management tools
 - Policy enforcement layer
 
-### Step 2: Configure ChatGPT
+### Step 2: Register OAuth Client
+
+**Obtain OAuth Credentials:**
+
+1. Contact Conducktor partnerships team: partnerships@conducktor.com
+2. Provide:
+   - Organization name
+   - Use case (ChatGPT integration)
+   - Redirect URIs for your application
+3. Receive your OAuth client credentials:
+   - `client_id` - Unique identifier for your application
+   - `client_secret` - Confidential secret (store securely)
+
+**Alternatively, use Dynamic Registration (RFC 7591):**
+
+```bash
+# Automatically register your OAuth client
+curl -X POST https://api.conducktor.com/api/oauth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_name": "ChatGPT Integration - [Your Org]",
+    "redirect_uris": ["https://your-app.com/oauth/callback"],
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "scope": "mcp:tools mcp:read"
+  }'
+
+# Response includes your client_id and client_secret
+```
+
+### Step 3: Configure ChatGPT
 
 **For ChatGPT Plus:**
 
@@ -44,7 +74,8 @@ This endpoint provides access to:
    - **Name:** `Conducktor Gateway`
    - **Server URL:** `https://api.conducktor.com/api/conducktor-mcp`
    - **Authentication:** OAuth 2.0
-   - **Client ID:** `chatgpt-mcp-client`
+   - **Client ID:** `[Your registered client_id]`
+   - **Client Secret:** `[Your client_secret]` (if required)
 4. Click "Connect"
 
 **For ChatGPT Enterprise:**
@@ -52,11 +83,12 @@ This endpoint provides access to:
 1. Contact your ChatGPT Enterprise administrator
 2. Provide them with:
    - MCP Server URL: `https://api.conducktor.com/api/conducktor-mcp`
-   - OAuth Client ID: `chatgpt-mcp-client`
+   - OAuth Client ID: `[Your registered client_id]`
+   - OAuth Client Secret: `[Your client_secret]`
    - Documentation: This guide
 3. Administrator configures organization-wide MCP server
 
-### Step 3: Authorize Connection
+### Step 4: Authorize Connection
 
 1. ChatGPT redirects you to Conducktor's authorization page
 2. Log in to your Conducktor account (or create one)
