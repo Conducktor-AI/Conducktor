@@ -55,7 +55,8 @@ See our [Linear Integration Guide](docs/integrations/LINEAR.md) for a complete e
 - **[Custom Integrations](docs/integrations/CUSTOM.md)** - Build your own MCP connector
 
 ### Authentication & Security
-- **[OAuth 2.1 Guide](docs/authentication/OAUTH_GUIDE.md)** - Implementing OAuth 2.1 with PKCE
+- **[OAuth Complete Guide](docs/authentication/OAUTH_COMPLETE_GUIDE.md)** - Comprehensive OAuth 2.0/2.1 documentation
+- **[OAuth 2.1 with PKCE](docs/authentication/OAUTH_GUIDE.md)** - For MCP server providers
 - **[Security Policy](SECURITY.md)** - Security practices and vulnerability reporting
 - **[Privacy Policy](PRIVACY.md)** - Data handling and privacy practices
 
