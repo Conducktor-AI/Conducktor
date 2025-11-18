@@ -5,13 +5,13 @@
 
 ## Introduction
 
-Conducktr Inc. ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Model Context Protocol (MCP) integration platform.
+Conducktor Inc. ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Model Context Protocol (MCP) integration platform.
 
 ## Information We Collect
 
 ### 1. Account Information
 
-When you register for Conducktr, we collect:
+When you register for Conducktor, we collect:
 - **Email address** - For account identification and communication
 - **Display name** - For personalization
 - **Password** - Stored as a bcrypt hash, never in plain text
@@ -221,7 +221,7 @@ You have the right to:
 - **Object to automated decisions** - Request manual review of policy denials
 - **Opt out of profiling** - Disable usage pattern analysis
 
-**How to exercise:** Contact privacy@conducktr.com
+**How to exercise:** Contact privacy@conducktor.com
 
 ### GDPR Rights (EU Users)
 
@@ -231,7 +231,7 @@ EU users have additional rights under GDPR:
 - Right to withdraw consent
 - Right to lodge a complaint with supervisory authority
 
-**EU Representative:** gdpr@conducktr.com
+**EU Representative:** gdpr@conducktor.com
 
 ### CCPA Rights (California Users)
 
@@ -241,17 +241,17 @@ California users have rights under CCPA:
 - Right to opt out of sale (not applicable)
 - Right to non-discrimination
 
-**California Contact:** ccpa@conducktr.com
+**California Contact:** ccpa@conducktor.com
 
 ## Children's Privacy
 
-Conducktr is not intended for children under 13 (or 16 in the EU). We do not knowingly collect data from children. If you believe we have collected data from a child, contact us immediately at privacy@conducktr.com.
+Conducktor is not intended for children under 13 (or 16 in the EU). We do not knowingly collect data from children. If you believe we have collected data from a child, contact us immediately at privacy@conducktor.com.
 
 ## Cookies & Tracking
 
 ### Essential Cookies
 
-**Authentication Cookie:** `conducktr_session`
+**Authentication Cookie:** `conducktor_session`
 - **Purpose:** Maintain user session
 - **Duration:** 1 hour (configurable)
 - **Type:** httpOnly, Secure, SameSite=Lax
@@ -314,20 +314,20 @@ We use these third-party services:
 
 ## Contact Us
 
-**Privacy Questions:** privacy@conducktr.com  
-**Data Subject Requests:** dsr@conducktr.com  
-**GDPR (EU):** gdpr@conducktr.com  
-**CCPA (California):** ccpa@conducktr.com  
-**General Support:** support@conducktr.com
+**Privacy Questions:** privacy@conducktor.com  
+**Data Subject Requests:** dsr@conducktor.com  
+**GDPR (EU):** gdpr@conducktor.com  
+**CCPA (California):** ccpa@conducktor.com  
+**General Support:** support@conducktor.com
 
 **Mailing Address:**  
-Conducktr Inc.  
+Conducktor Inc.  
 Privacy Department  
 [Address]  
 [City, State, ZIP]  
 United States
 
-**Data Protection Officer:** dpo@conducktr.com
+**Data Protection Officer:** dpo@conducktor.com
 
 ---
 

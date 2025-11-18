@@ -1,26 +1,14 @@
-# Conducktr Documentation
+# Conducktor Documentation
 
 **Enterprise MCP Integration Platform with Governance & Observability**
 
-![Conducktr](https://github.com/user-attachments/assets/e2758d4a-af95-4b5a-bfe3-7b04291c7a82)
+![Conducktor](https://github.com/user-attachments/assets/e2758d4a-af95-4b5a-bfe3-7b04291c7a82)
 
-Conducktr is a centrally managed Model Context Protocol (MCP) integration platform that provides enterprise-grade governance, security, and observability for AI applications.
+Conducktor is a centrally managed Model Context Protocol (MCP) integration platform that provides enterprise-grade governance, security, and observability for AI applications.
 
 ## 🌟 Overview
 
-Conducktr acts as a universal gateway between AI applications (like ChatGPT, Claude, or custom AI agents) and external services through the Model Context Protocol. It provides centralized policy enforcement, cost controls, approval workflows, and comprehensive audit logging.
-
-### 🎯 Currently in Private Beta
-
-Conducktr is currently in private beta. We're accepting a limited number of users to ensure a high-quality experience.
-
-**[Join the Waitlist →](https://app.conducktr.com/waitlist)**
-
-What to expect:
-- Early access to all features
-- Priority support
-- Influence on product roadmap
-- Exclusive beta pricing (locked in for 1 year)
+Conducktor acts as a universal gateway between AI applications (like ChatGPT, Claude, or custom AI agents) and external services through the Model Context Protocol. It provides centralized policy enforcement, cost controls, approval workflows, and comprehensive audit logging.
 
 ### Key Benefits
 
@@ -36,13 +24,11 @@ What to expect:
 
 ### For AI Application Developers
 
-Connect your AI application (ChatGPT, Claude, etc.) to Conducktr:
-
-**Currently in Private Beta** - [Join the Waitlist](https://app.conducktr.com/waitlist)
+Connect your AI application (ChatGPT, Claude, etc.) to Conducktor:
 
 ```bash
-# MCP Server URL (Beta Access Required)
-https://api.conducktr.com/api/conducktr-mcp
+# MCP Server URL
+https://api.conducktor.com/api/conducktor-mcp
 
 # Authentication
 OAuth 2.0 with Client ID: chatgpt-mcp-client
@@ -52,9 +38,9 @@ See our [ChatGPT Integration Guide](docs/integrations/CHATGPT.md) for step-by-st
 
 ### For Service Integrators
 
-Connect your service to Conducktr as an MCP server:
+Connect your service to Conducktor as an MCP server:
 
-1. Register your OAuth application with Conducktr
+1. Register your OAuth application with Conducktor
 2. Implement MCP protocol endpoints
 3. Submit for review
 
@@ -63,8 +49,8 @@ See our [Linear Integration Guide](docs/integrations/LINEAR.md) for a complete e
 ## 📚 Documentation
 
 ### Integration Guides
-- **[Linear Integration](docs/integrations/LINEAR.md)** - Connect Linear's MCP server to Conducktr
-- **[ChatGPT Integration](docs/integrations/CHATGPT.md)** - Configure ChatGPT to use Conducktr
+- **[Linear Integration](docs/integrations/LINEAR.md)** - Connect Linear's MCP server to Conducktor
+- **[ChatGPT Integration](docs/integrations/CHATGPT.md)** - Configure ChatGPT to use Conducktor
 - **[Custom Integrations](docs/integrations/CUSTOM.md)** - Build your own MCP connector
 
 ### Authentication & Security
@@ -92,31 +78,118 @@ Conducktr is built with security and privacy as core principles:
 
 See our [Security Policy](SECURITY.md) for details on vulnerability reporting and security practices.
 
+## 🔌 Available Connectors
+
+Conducktor provides access to 50+ pre-built MCP connectors across multiple categories:
+
+### Microsoft Ecosystem
+- **Azure MCP Server** - 40+ Azure services (Resource Manager, VMs, Storage, etc.)
+- **Azure AI Foundry** - Azure AI Studio, OpenAI Service, model deployments
+- **Azure DevOps** - Work items, pipelines, repos, pull requests
+- **Azure Kubernetes (AKS)** - Cluster management and workload operations
+- **Microsoft SQL** - Database queries, schema management, stored procedures
+- **Microsoft Dataverse** - Power Platform data operations
+- **Microsoft Fabric** - Data lakehouse, warehousing, and analytics
+- **Microsoft Learn Docs** - Technical documentation search
+- **Microsoft Clarity** - User behavior analytics
+- **Microsoft 365 Agents Toolkit** - Graph API, Teams, Outlook, SharePoint
+
+### Development & Collaboration
+- **GitHub** - Repositories, issues, pull requests, actions, webhooks
+- **GitLab** - Source control, CI/CD pipelines, merge requests
+- **Linear** (OAuth 2.1 + API Key) - Issue tracking, project management, roadmaps
+- **Slack** - Messaging, channels, user management, file sharing
+- **Notion** - Knowledge bases, databases, pages, collaboration
+
+### AI & APIs
+- **OpenAI ChatGPT** - REST API integration for chat completions
+- **Anthropic Claude** - Claude AI model access via MCP
+- **Postman** - API testing, collections, environments
+
+### DevOps & Infrastructure
+- **Vercel** - Deployments, projects, domains, edge functions
+- **Cloudflare** - CDN, DNS, Workers, Pages
+- **Redis** - Cache operations, data structures, pub/sub
+- **Supabase** - Database, authentication, storage, edge functions
+
+### Monitoring & Analytics
+- **Grafana** - Dashboards, alerts, data sources, visualization
+- **New Relic** - APM, infrastructure monitoring, logs, traces
+- **PagerDuty** - Incident management, on-call schedules, escalations
+- **Amplitude** - Product analytics, user behavior, funnels
+- **BrowserStack** - Cross-browser testing, device testing
+
+### Business Tools
+- **Stripe** - Payments, subscriptions, customers, invoicing
+- **Atlassian** - Jira, Confluence, issue tracking, project management
+- **monday.com** - Work management, boards, automation
+
+### Financial Data
+- **Massive MCP** - Real-time market data, stock prices, trades, historical aggregates
+
+**Integration Guides:**
+- **[Linear Integration](docs/integrations/LINEAR.md)** - OAuth 2.1 with PKCE setup
+- **[ChatGPT Integration](docs/integrations/CHATGPT.md)** - Configure ChatGPT as MCP client
+
 ## 🤝 Partner Program
 
-### AI Client Partners
+### Technology Partnership Opportunities
 
-If you're building an AI application that wants to integrate with Conducktr:
+Conducktor welcomes partnerships with technology companies interested in integrating their services into the MCP ecosystem. As a partner, you can:
 
-1. Review our [ChatGPT Integration Guide](docs/integrations/CHATGPT.md)
-2. Test your integration in our sandbox environment
-3. Submit your application for production access
+**Partner Benefits:**
+- **Co-Marketing** - Featured placement in our connector catalog and documentation
+- **Technical Support** - Dedicated integration assistance and priority issue resolution
+- **Joint Success** - Shared case studies and joint customer success stories
+- **Revenue Opportunities** - Participate in our connector marketplace (coming 2026)
 
-### MCP Server Partners
+**Partnership Types:**
 
-If you're a service provider wanting to offer MCP integration through Conducktr:
+1. **MCP Server Provider** - Build and maintain an official MCP connector for your service
+   - Requirements: OAuth 2.1 with PKCE, comprehensive API documentation, security policies
+   - Support: Integration guide review, testing environment access, technical consultation
+   - Examples: Linear, GitHub, Notion, Stripe
 
-1. Review our [Linear Integration Guide](docs/integrations/LINEAR.md) as a reference
-2. Implement the MCP protocol with OAuth 2.1
-3. Submit for partner review
+2. **AI Application Provider** - Integrate Conducktor as your MCP gateway
+   - Requirements: MCP client implementation, OAuth 2.0 support
+   - Support: Sandbox environment, integration testing, co-marketing materials  
+   - Examples: ChatGPT, Claude, custom AI agents
 
-**Requirements:**
-- OAuth 2.1 with PKCE support
-- Comprehensive API documentation
-- Security and privacy policies
-- Responsive support team
+3. **Enterprise Reseller** - Offer Conducktor as part of your solution portfolio
+   - Requirements: Enterprise customer base, professional services capability
+   - Support: White-label options, dedicated account management, revenue sharing
+   - Examples: System integrators, managed service providers, consulting firms
 
-Contact: partnerships@conducktr.com
+**Getting Started:**
+
+1. **Review Technical Requirements**
+   - MCP Server Providers: [OAuth 2.1 Implementation Guide](docs/authentication/OAUTH_GUIDE.md)
+   - AI Application Providers: [ChatGPT Integration Guide](docs/integrations/CHATGPT.md)
+   - Enterprise Resellers: Contact partnerships team for partner kit
+
+2. **Submit Partnership Application**
+   - Email: partnerships@conducktor.com
+   - Include: Company overview, integration use case, expected timeline
+   - Response time: 2-3 business days
+
+3. **Integration Development**
+   - Access to sandbox environment and testing tools
+   - Dedicated Slack channel with engineering team
+   - Weekly sync calls during integration phase
+
+4. **Launch & Promotion**
+   - Joint press release and blog post
+   - Featured in connector catalog
+   - Co-hosted webinar and case study
+
+**Technical Standards:**
+- OAuth 2.1 with PKCE (RFC 7636) - Required for all MCP server integrations
+- RFC 8414 OAuth Discovery - Recommended for automatic configuration
+- HTTPS-only endpoints - Required for production
+- Comprehensive API documentation - Must include examples and error handling
+- Security & privacy policies - SOC 2 / ISO 27001 preferred
+
+Contact: partnerships@conducktor.com
 
 ## 📊 Use Cases
 
@@ -140,10 +213,10 @@ Contact: partnerships@conducktr.com
 
 ## 🌐 Production Environment
 
-- **API Endpoint:** `https://api.conducktr.com`
-- **Web Dashboard:** `https://app.conducktr.com`
-- **Status Page:** `https://status.conducktr.com`
-- **Support:** support@conducktr.com
+- **API Endpoint:** `https://api.conducktor.com`
+- **Web Dashboard:** `https://app.conducktor.com`
+- **Status Page:** `https://status.conducktor.com`
+- **Support:** support@conducktor.com
 
 ## 📋 Compliance & Certifications
 
@@ -154,10 +227,10 @@ Contact: partnerships@conducktr.com
 
 ## 🔗 Resources
 
-- **Website:** [www.conducktr.com](https://www.conducktr.com)
-- **Documentation:** [docs.conducktr.com](https://docs.conducktr.com)
-- **API Status:** [status.conducktr.com](https://status.conducktr.com)
-- **Community:** [community.conducktr.com](https://community.conducktr.com)
+- **Website:** [www.conducktor.com](https://www.conducktor.com)
+- **Documentation:** [docs.conducktor.com](https://docs.conducktor.com)
+- **API Status:** [status.conducktor.com](https://status.conducktor.com)
+- **Community:** [community.conducktor.com](https://community.conducktor.com)
 
 ## 📄 License
 
@@ -165,4 +238,4 @@ This documentation is licensed under [Creative Commons Attribution 4.0 Internati
 
 ---
 
-**Questions?** Contact us at support@conducktr.com or visit our [community forum](https://community.conducktr.com).
+**Questions?** Contact us at support@conducktor.com or visit our [community forum](https://community.conducktor.com).

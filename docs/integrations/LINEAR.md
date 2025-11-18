@@ -1,8 +1,8 @@
 # Linear Integration Guide
 
-**Integrating Linear's MCP Server with Conducktr**
+**Integrating Linear's MCP Server with Conducktor**
 
-This guide explains how to connect Linear's Model Context Protocol (MCP) server to Conducktr, enabling AI applications like ChatGPT to interact with your Linear workspace through a centralized, governed gateway.
+This guide explains how to connect Linear's Model Context Protocol (MCP) server to Conducktor, enabling AI applications like ChatGPT to interact with your Linear workspace through a centralized, governed gateway.
 
 ## Overview
 
@@ -13,7 +13,7 @@ Linear provides an MCP server that allows AI applications to:
 - Manage labels and workflows
 - Access roadmaps and cycles
 
-By connecting Linear to Conducktr, you gain:
+By connecting Linear to Conducktor, you gain:
 - **Centralized governance** - Policy enforcement and approval workflows
 - **Cost controls** - Budget limits and spending alerts
 - **Audit logging** - Complete trail of all Linear operations
@@ -22,7 +22,7 @@ By connecting Linear to Conducktr, you gain:
 ## Prerequisites
 
 Before you begin, ensure you have:
-- [ ] A Conducktr account ([join waitlist](https://app.conducktr.com/waitlist) for beta access)
+- [ ] A Conducktor account
 - [ ] A Linear workspace with admin access
 - [ ] OAuth application credentials from Linear (or use automatic registration)
 
@@ -62,15 +62,15 @@ Personal API keys provide direct access with your user's permissions.
 1. Go to Linear Settings → API → OAuth Applications
 2. Click "New OAuth Application"
 3. Configure:
-   - **Name:** `Conducktr MCP Gateway`
+   - **Name:** `Conducktor MCP Gateway`
    - **Description:** `Enterprise MCP integration platform`
-   - **Callback URLs:** `https://app.conducktr.com/oauth/callback`
+   - **Callback URLs:** `https://app.conducktor.com/oauth/callback`
    - **Scopes:** Select `read`, `write` (as needed)
 4. Save and copy your **Client ID** and **Client Secret**
 
-**Step 2: Add Linear Connection in Conducktr**
+**Step 2: Add Linear Connection in Conducktor**
 
-1. Log in to [Conducktr Dashboard](https://app.conducktr.com)
+1. Log in to [Conducktor Dashboard](https://app.conducktor.com)
 2. Navigate to **Connections** → **Catalog**
 3. Find "Linear MCP" and click **Deploy**
 4. In the wizard:
@@ -85,7 +85,7 @@ Personal API keys provide direct access with your user's permissions.
 1. A new tab opens with Linear's authorization page
 2. Review the requested permissions
 3. Click **Authorize**
-4. You'll be redirected back to Conducktr
+4. You'll be redirected back to Conducktor
 5. Connection status changes to **ACTIVE**
 
 ### Option B: OAuth 2.1 with Dynamic Registration
@@ -94,7 +94,7 @@ Linear supports RFC 7591 Dynamic Client Registration, allowing automatic OAuth a
 
 **Step 1: Deploy Connection with Empty Credentials**
 
-1. Log in to [Conducktr Dashboard](https://app.conducktr.com)
+1. Log in to [Conducktor Dashboard](https://app.conducktor.com)
 2. Navigate to **Connections** → **Catalog**
 3. Find "Linear MCP" and click **Deploy**
 4. In the wizard:
@@ -105,7 +105,7 @@ Linear supports RFC 7591 Dynamic Client Registration, allowing automatic OAuth a
 
 **Step 2: Automatic Registration & Authorization**
 
-1. Conducktr automatically registers an OAuth application with Linear
+1. Conducktor automatically registers an OAuth application with Linear
 2. Linear's authorization page opens
 3. Review permissions and click **Authorize**
 4. Connection status changes to **ACTIVE**
@@ -116,12 +116,12 @@ Linear supports RFC 7591 Dynamic Client Registration, allowing automatic OAuth a
 
 1. Go to Linear Settings → API → Personal API Keys
 2. Click "Create new key"
-3. Give it a name: `Conducktr MCP Gateway`
+3. Give it a name: `Conducktor MCP Gateway`
 4. Copy the generated key (starts with `lin_api_`)
 
-**Step 2: Add Connection in Conducktr**
+**Step 2: Add Connection in Conducktor**
 
-1. Log in to [Conducktr Dashboard](https://app.conducktr.com)
+1. Log in to [Conducktor Dashboard](https://app.conducktor.com)
 2. Navigate to **Connections** → **Catalog**
 3. Find "Linear RestAPI" (API Key version)
 4. Click **Deploy**

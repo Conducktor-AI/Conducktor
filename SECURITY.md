@@ -77,11 +77,11 @@ We take security seriously. If you discover a security vulnerability, please fol
 
 ### 1. DO NOT Create a Public Issue
 
-Please **do not** create a public GitHub issue for security vulnerabilities. This helps protect Conducktr users from exploitation.
+Please **do not** create a public GitHub issue for security vulnerabilities. This helps protect Conducktor users from exploitation.
 
 ### 2. Report via Email
 
-Send your vulnerability report to: **security@conducktr.com**
+Send your vulnerability report to: **security@conducktor.com**
 
 Include the following information:
 - Description of the vulnerability
@@ -142,7 +142,7 @@ We currently do not have a formal bug bounty program, but we:
 ### For AI Client Applications (like ChatGPT)
 
 **Integration Security:**
-- OAuth 2.0 for user authentication to Conducktr
+- OAuth 2.0 for user authentication to Conducktor
 - Token storage in secure, httponly cookies
 - CORS properly configured
 - No credential exposure in client-side code
@@ -170,15 +170,15 @@ We offer Data Processing Agreements (DPAs) for:
 - HIPAA-covered entities
 - Custom compliance requirements
 
-Contact: legal@conducktr.com
+Contact: legal@conducktor.com
 
 ## Security Updates & Advisories
 
 **Notification Channels:**
 - Email notifications to registered admin users
-- Security advisories published at: security.conducktr.com
-- Status page: status.conducktr.com
-- RSS feed: status.conducktr.com/feed
+- Security advisories published at: security.conducktor.com
+- Status page: status.conducktor.com
+- RSS feed: status.conducktor.com/feed
 
 **Severity Levels:**
 
@@ -245,12 +245,12 @@ RATE_LIMIT_PER_MINUTE=60
 
 ## Security Contact
 
-**General Security Inquiries:** security@conducktr.com  
-**Vulnerability Reports:** security@conducktr.com  
-**Compliance Questions:** compliance@conducktr.com  
-**Legal/DPA Requests:** legal@conducktr.com
+**General Security Inquiries:** security@conducktor.com  
+**Vulnerability Reports:** security@conducktor.com  
+**Compliance Questions:** compliance@conducktor.com  
+**Legal/DPA Requests:** legal@conducktor.com
 
-**PGP Key:** Available at [keys.conducktr.com/security.asc](https://keys.conducktr.com/security.asc)
+**PGP Key:** Available at [keys.conducktor.com/security.asc](https://keys.conducktor.com/security.asc)
 
 ---
 

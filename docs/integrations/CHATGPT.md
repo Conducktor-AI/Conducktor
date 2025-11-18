@@ -1,12 +1,12 @@
 # ChatGPT Integration Guide
 
-**Connecting ChatGPT to Conducktr's MCP Gateway**
+**Connecting ChatGPT to Conducktor's MCP Gateway**
 
-This guide explains how to configure ChatGPT to use Conducktr as its Model Context Protocol (MCP) server, giving ChatGPT access to all your connected services through a centralized, governed gateway.
+This guide explains how to configure ChatGPT to use Conducktor as its Model Context Protocol (MCP) server, giving ChatGPT access to all your connected services through a centralized, governed gateway.
 
 ## Overview
 
-ChatGPT's MCP support allows it to interact with external services through MCP servers. By using Conducktr as your MCP gateway, ChatGPT gains:
+ChatGPT's MCP support allows it to interact with external services through MCP servers. By using Conducktor as your MCP gateway, ChatGPT gains:
 
 - **Access to 50+ Services** - Linear, GitHub, Slack, Notion, and more through a single connection
 - **Enterprise Governance** - Policy enforcement, approval workflows, and audit logging
@@ -16,22 +16,22 @@ ChatGPT's MCP support allows it to interact with external services through MCP s
 ## Prerequisites
 
 - [ ] A ChatGPT account (ChatGPT Plus or Enterprise)
-- [ ] A Conducktr account ([join waitlist](https://app.conducktr.com/waitlist) for beta access)
-- [ ] At least one MCP connection configured in Conducktr (e.g., Linear, GitHub, Slack)
+- [ ] A Conducktor account
+- [ ] At least one MCP connection configured in Conducktor (e.g., Linear, GitHub, Slack)
 
 ## Quick Start
 
-### Step 1: Get Your Conducktr MCP Endpoint
+### Step 1: Get Your Conducktor MCP Endpoint
 
-Your unique MCP endpoint is displayed in your Conducktr dashboard:
+Your unique MCP endpoint is displayed in your Conducktor dashboard:
 
 ```
-https://api.conducktr.com/api/conducktr-mcp
+https://api.conducktor.com/api/conducktor-mcp
 ```
 
 This endpoint provides access to:
 - All your connected MCP servers
-- Conducktr management tools
+- Conducktor management tools
 - Policy enforcement layer
 
 ### Step 2: Configure ChatGPT
@@ -41,8 +41,8 @@ This endpoint provides access to:
 1. Open ChatGPT Settings → Extensions → Model Context Protocol
 2. Click "Add MCP Server"
 3. Configure:
-   - **Name:** `Conducktr Gateway`
-   - **Server URL:** `https://api.conducktr.com/api/conducktr-mcp`
+   - **Name:** `Conducktor Gateway`
+   - **Server URL:** `https://api.conducktor.com/api/conducktor-mcp`
    - **Authentication:** OAuth 2.0
    - **Client ID:** `chatgpt-mcp-client`
 4. Click "Connect"
@@ -51,15 +51,15 @@ This endpoint provides access to:
 
 1. Contact your ChatGPT Enterprise administrator
 2. Provide them with:
-   - MCP Server URL: `https://api.conducktr.com/api/conducktr-mcp`
+   - MCP Server URL: `https://api.conducktor.com/api/conducktor-mcp`
    - OAuth Client ID: `chatgpt-mcp-client`
    - Documentation: This guide
 3. Administrator configures organization-wide MCP server
 
 ### Step 3: Authorize Connection
 
-1. ChatGPT redirects you to Conducktr's authorization page
-2. Log in to your Conducktr account (or create one)
+1. ChatGPT redirects you to Conducktor's authorization page
+2. Log in to your Conducktor account (or create one)
 3. Review the requested permissions:
    - Access to your MCP connections
    - Execute tools on your behalf

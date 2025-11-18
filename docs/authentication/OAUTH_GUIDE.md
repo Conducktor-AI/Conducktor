@@ -2,11 +2,11 @@
 
 **Implementing OAuth 2.1 with PKCE for MCP Server Integration**
 
-This guide is for service providers who want to integrate their MCP server with Conducktr using OAuth 2.1 with Proof Key for Code Exchange (PKCE).
+This guide is for service providers who want to integrate their MCP server with Conducktor using OAuth 2.1 with Proof Key for Code Exchange (PKCE).
 
 ## Overview
 
-OAuth 2.1 is the modern authorization standard that consolidates best practices from OAuth 2.0 and adds mandatory security features. Conducktr requires OAuth 2.1 with PKCE for all third-party MCP server integrations.
+OAuth 2.1 is the modern authorization standard that consolidates best practices from OAuth 2.0 and adds mandatory security features. Conducktor requires OAuth 2.1 with PKCE for all third-party MCP server integrations.
 
 ### Why OAuth 2.1 + PKCE?
 
@@ -34,7 +34,7 @@ Before implementing OAuth 2.1 for your MCP server:
 
 ## Required Standards
 
-Conducktr's OAuth 2.1 implementation follows these RFCs:
+Conducktor's OAuth 2.1 implementation follows these RFCs:
 
 | RFC | Title | Status |
 |-----|-------|--------|
@@ -94,8 +94,8 @@ code_challenge_method=S256 (required, must be SHA-256)
 ```http
 GET /oauth/authorize
   ?response_type=code
-  &client_id=conducktr_client_abc123
-  &redirect_uri=https://app.conducktr.com/oauth/callback
+  &client_id=conducktor_client_abc123
+  &redirect_uri=https://app.conducktor.com/oauth/callback
   &scope=read%20write
   &state=random_32_byte_state
   &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
@@ -135,7 +135,7 @@ def authorize(request):
 **User Authorization Page:**
 
 Display to user:
-- Client application name (e.g., "Conducktr")
+- Client application name (e.g., "Conducktor")
 - Requested permissions (e.g., "Read your issues", "Create issues")
 - Approve/Deny buttons
 
@@ -183,8 +183,8 @@ Content-Type: application/x-www-form-urlencoded
 
 grant_type=authorization_code
 &code=abc123_authorization_code
-&redirect_uri=https://app.conducktr.com/oauth/callback
-&client_id=conducktr_client_abc123
+&redirect_uri=https://app.conducktor.com/oauth/callback
+&client_id=conducktor_client_abc123
 &client_secret=secret_xyz (if applicable)
 &code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 ```
@@ -410,15 +410,15 @@ def revoke_token(request):
 
 ## Dynamic Client Registration (RFC 7591) - Optional
 
-Allow Conducktr to automatically register OAuth clients:
+Allow Conducktor to automatically register OAuth clients:
 
 **Endpoint:** `POST /oauth/register`
 
 **Request:**
 ```json
 {
-  "client_name": "Conducktr",
-  "redirect_uris": ["https://app.conducktr.com/oauth/callback"],
+  "client_name": "Conducktor",
+  "redirect_uris": ["https://app.conducktor.com/oauth/callback"],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "scope": "read write",
@@ -433,7 +433,7 @@ Allow Conducktr to automatically register OAuth clients:
   "client_secret": "auto_generated_secret",
   "client_id_issued_at": 1700000000,
   "client_secret_expires_at": 0,
-  "redirect_uris": ["https://app.conducktr.com/oauth/callback"],
+  "redirect_uris": ["https://app.conducktor.com/oauth/callback"],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "scope": "read write"
@@ -542,9 +542,9 @@ curl -X POST https://your-api.example.com/oauth/token \
   -d "client_id=test"
 ```
 
-## Conducktr Integration Checklist
+## Conducktor Integration Checklist
 
-Before submitting your MCP server for Conducktr integration:
+Before submitting your MCP server for Conducktor integration:
 
 - [ ] OAuth discovery endpoint returns valid metadata
 - [ ] Authorization endpoint supports PKCE (S256 only)
@@ -566,10 +566,10 @@ Before submitting your MCP server for Conducktr integration:
 - RFC 8414: [OAuth Discovery](https://datatracker.ietf.org/doc/html/rfc8414)
 - RFC 7591: [Dynamic Registration](https://datatracker.ietf.org/doc/html/rfc7591)
 
-**Conducktr Resources:**
-- Integration Portal: [partners.conducktr.com](https://partners.conducktr.com)
-- API Documentation: [docs.conducktr.com/api](https://docs.conducktr.com/api)
-- Partner Support: partners@conducktr.com
+**Conducktor Resources:**
+- Integration Portal: [partners.conducktor.com](https://partners.conducktor.com)
+- API Documentation: [docs.conducktor.com/api](https://docs.conducktor.com/api)
+- Partner Support: partners@conducktor.com
 
 **Tools:**
 - OAuth Debugger: [oauthdebugger.com](https://oauthdebugger.com)
