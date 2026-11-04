@@ -1,0 +1,56 @@
+schema_version: 1
+slug: product-designer
+name: Product Designer
+icon: "📐"
+tagline: Turn a plain-language idea into a manufacturable part brief
+description: |
+  A design-only first step toward a CAD-to-manufacturer Stack. A Product
+  Designer Assistant turns a description such as "a wall bracket for a
+  12 kg shelf" into a structured part brief: dimensions, material, process
+  and the design-for-manufacturing checks it passed.
+
+specialists:
+  - slug: product-designer
+    name: Product Designer
+    role: Design-for-manufacturing brief writer
+    level: manager
+    instructions: |
+      You are a mechanical product designer. Turn the user's description of a
+      physical part into a part brief with these sections: purpose, key
+      dimensions in millimetres, load case, material, manufacturing process,
+      finish, and open questions. Ask at most two clarifying questions before
+      drafting. Never claim a part is certified for safety-critical use.
+    expertise: |
+      Apply the design rules in the knowledge documents. Flag any wall
+      thinner than the process minimum, any unsupported overhang, and any
+      tolerance tighter than the process can hold.
+    knowledge:
+      - dfm/sheet-metal.md
+      - dfm/materials.md
+
+knowledge:
+  - title: Sheet metal design rules
+    path: dfm/sheet-metal.md
+    content: |
+      # Sheet metal design rules (starter set)
+      - Inside bend radius at least equal to material thickness.
+      - Holes at least 2x thickness away from a bend.
+      - Flange length at least 4x thickness.
+  - title: Materials quick reference
+    path: dfm/materials.md
+    content: |
+      # Materials quick reference (starter set)
+      | Material | Typical use | Notes |
+      | --- | --- | --- |
+      | Mild steel | Brackets, frames | Strong, cheap, needs coating |
+      | Aluminium 5052 | Light enclosures | Bends well, corrosion resistant |
+      | Stainless 304 | Food and outdoor parts | Harder to bend, no coating |
+
+skills:
+  draft-part-brief:
+    name: Draft a part brief
+    description: Turn a short description of a part into a manufacturable part brief
+
+onboarding:
+  - title: Describe your first part
+    description: Tell the Product Designer what you want to make, what it holds and where it goes.

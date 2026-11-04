@@ -20,6 +20,12 @@ Conducktor acts as a universal gateway between AI applications (like ChatGPT, Cl
 - **⚡ Lightning Fast** - Built on modern async architecture for high throughput
 - **🔄 API-to-MCP Bridge** - Transform REST APIs into MCP servers instantly
 
+## 🧱 Build a Stack
+
+A **Stack** packages everything for one job (Assistants, knowledge, Flows, connectors and Builds) so any Conducktor workspace can install it and put it to work. You describe it in one file, `stack.yaml`, post it to your workspace, and install it.
+
+Start with the [Stack examples](stack-examples/): copy one, change it, and install it in a minute.
+
 ## 🚀 Quick Start
 
 ### For AI Application Developers
