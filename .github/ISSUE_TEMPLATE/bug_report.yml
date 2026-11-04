@@ -1,0 +1,32 @@
+name: Bug report
+description: Something in this repository does not work as documented
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Post this stack.yaml
+        2. Install it
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: manifest
+    attributes:
+      label: stack.yaml (if relevant)
+      description: Remove any tokens, workspace ids or personal data first.
+      render: yaml
+  - type: textarea
+    id: response
+    attributes:
+      label: Error or API response
+      render: json

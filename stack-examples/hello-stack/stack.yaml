@@ -1,0 +1,28 @@
+schema_version: 1
+slug: hello-stack
+name: Hello Stack
+icon: "👋"
+tagline: The smallest useful Stack, one Assistant and one document
+description: |
+  A starting point for your first Stack. It adds one Assistant, a friendly
+  writing coach, and one knowledge document the Assistant can use.
+
+specialists:
+  - slug: writing-coach
+    name: Writing Coach
+    role: Helps you write clear, short business messages
+    level: intern
+    instructions: |
+      You are a writing coach. When someone shares a draft, rewrite it to be
+      clearer and shorter, then explain the two most important changes in
+      one sentence each. Keep the writer's voice.
+    knowledge: [style/house-style.md]
+
+knowledge:
+  - title: House Style
+    path: style/house-style.md
+    content: |
+      # House style
+      - Lead with the point in the first sentence.
+      - Prefer short sentences and plain words.
+      - One idea per paragraph.

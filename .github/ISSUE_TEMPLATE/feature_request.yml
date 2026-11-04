@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest something that would make building Stacks easier
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The job you are trying to get done, and what gets in the way today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried instead?
