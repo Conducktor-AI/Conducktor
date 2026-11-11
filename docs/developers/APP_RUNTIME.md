@@ -397,7 +397,6 @@ In practice:
 | Not yet available to app code | Workaround today | Status |
 |------------------------------|------------------|--------|
 | Read/write the workspace knowledge plane (Context Kernel) | Keep app state in the App Data Store | Roadmap |
-| Call other apps (Interop) | — | Roadmap |
 | Read workspace Vault secrets | Copy the value you need into the app's own config with `PUT /api/builder/builds/{build_id}/config?workspace_id=<id>` | Roadmap |
 | Drive a headless browser (the platform's Browser Automation tools) | Grant the Browser Automation connector to the Build and call its tools (navigate, screenshot, extract) as a connector call. To act signed in as the user, sign in first with the saved-login sign-in (`logins`, `services.sign_in`) and pass the browser session's context id it returns to those calls | Roadmap |
 
