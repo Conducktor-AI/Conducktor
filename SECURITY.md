@@ -1,258 +1,118 @@
 # Security Policy
 
-## Supported Versions
+Conducktor is a hosted service. Fixes are deployed to the service; there is no version for
+you to install or upgrade.
 
-We actively maintain security updates for the following versions:
+## Reporting a vulnerability
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+### Do not open a public issue
 
-## Security Practices
+Please do not report a vulnerability in a public GitHub issue, pull request or discussion.
+That exposes Conducktor users before a fix exists.
 
-### Data Protection
+### Email us
 
-**Encryption at Rest:**
-- All credentials and secrets are encrypted using Fernet (AES-256-CBC)
-- Database encryption for sensitive fields
-- Multi-key encryption support for zero-downtime key rotation
+Send the report to **security@conducktor.com**. Include:
 
-**Encryption in Transit:**
-- TLS 1.3 for all API communications
-- Certificate pinning for production environments
-- HSTS (HTTP Strict Transport Security) enabled
+- what the vulnerability is and where it is (URL, endpoint, MCP tool, or document);
+- steps to reproduce it;
+- what an attacker could do with it;
+- a suggested fix, if you have one;
+- how to reach you.
 
-**Authentication:**
-- OAuth 2.1 with PKCE (Proof Key for Code Exchange)
-- JWT tokens with short expiration (60 minutes default)
-- Refresh token rotation
-- Multi-factor authentication support (coming soon)
+Do not access, change or delete data that is not yours while you investigate, and stop as
+soon as you have shown the issue.
 
-### Access Controls
+### What happens next
 
-**Principle of Least Privilege:**
-- Role-based access control (RBAC)
-- Persona-based UI filtering (ADMIN, OPS, BUILDER, APPROVER)
-- Workspace-level isolation
-- Connection-level policy enforcement
-
-**Audit Logging:**
-- Comprehensive audit trail for all actions
-- Immutable event logs
-- Retention configurable per compliance requirements
-- Export capabilities for SIEM integration
-
-### Network Security
-
-**Infrastructure:**
-- Deployed on Google Cloud Platform (GKE)
-- Private networking between services
-- DDoS protection via Cloud Armor
-- Web Application Firewall (WAF) enabled
-
-**API Security:**
-- Rate limiting per user/workspace
-- Request size limits
-- IP whitelisting for admin operations
-- CORS policy enforcement
-
-### Credential Management
-
-**Vault Architecture:**
-- Centralized credential vault with encryption
-- Automatic credential rotation support
-- Expiration tracking and renewal alerts
-- Zero-knowledge credential storage
-
-**OAuth Token Handling:**
-- Tokens stored encrypted, never logged
-- Automatic refresh before expiration
-- Secure token revocation
-- State parameter validation (CSRF protection)
-
-## Reporting a Vulnerability
-
-We take security seriously. If you discover a security vulnerability, please follow these steps:
-
-### 1. DO NOT Create a Public Issue
-
-Please **do not** create a public GitHub issue for security vulnerabilities. This helps protect Conducktor users from exploitation.
-
-### 2. Report via Email
-
-Send your vulnerability report to: **security@conducktor.com**
-
-Include the following information:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if available)
-- Your contact information
-
-### 3. Expected Response Time
-
-| Severity | Initial Response | Status Update | Fix Timeline |
-|----------|------------------|---------------|--------------|
+| Severity | First response | Status updates | Fix target |
+|----------|----------------|----------------|------------|
 | Critical | 24 hours | Daily | 7 days |
 | High | 48 hours | Every 3 days | 30 days |
 | Medium | 5 days | Weekly | 60 days |
-| Low | 10 days | Bi-weekly | 90 days |
+| Low | 10 days | Every 2 weeks | 90 days |
 
-### 4. Responsible Disclosure
+1. **Acknowledge.** We confirm we received the report, within the times above.
+2. **Investigate.** We reproduce and assess it.
+3. **Fix.** We build, test and deploy a fix.
+4. **Notify.** We tell affected customers, where that applies.
+5. **Disclose.** We disclose the issue publicly after the fix is deployed, and credit you
+   if you want to be credited.
 
-We follow a responsible disclosure process:
+We do not run a formal bug bounty program.
 
-1. **Acknowledge:** We confirm receipt within the timeframes above
-2. **Investigate:** We investigate and validate the vulnerability
-3. **Fix:** We develop and test a fix
-4. **Notify:** We notify affected customers (if applicable)
-5. **Disclose:** We publicly disclose after fix is deployed (with your credit, if desired)
+## How Conducktor protects your data
 
-### 5. Bug Bounty Program
+### Credentials and secrets
 
-We currently do not have a formal bug bounty program, but we:
-- Acknowledge security researchers in our hall of fame
-- Provide swag for valid security reports
-- Offer references for security professionals
-- Consider bounties for critical vulnerabilities on a case-by-case basis
+- Credentials you give Conducktor (OAuth tokens, connector API keys, your own model keys)
+  are stored encrypted with Fernet (AES-128-CBC with an HMAC-SHA256 check). Several
+  encryption keys can be active at once, so keys can be rotated without losing access to
+  existing secrets.
+- Account passwords are stored as bcrypt hashes, never in plain text.
+- A secret you set on a Build cannot be read back through the API; reads return a masked
+  preview.
 
-## Security Features for Partners
+### Accounts and workspaces
 
-### For MCP Server Providers (like Linear)
+- Each account owns exactly one workspace, and every workspace has a single owner. Your
+  data, connections and Builds stay inside your workspace.
+- Requests to the REST API carry a user-session bearer token. MCP clients get OAuth access
+  tokens through the authorization code flow, with PKCE (S256) supported; tokens can be
+  revoked (RFC 7009) and introspected (RFC 7662).
+- When you connect a service over OAuth, Conducktor checks the `state` parameter on the
+  callback and uses PKCE (S256) with providers that support it.
 
-**OAuth 2.1 Requirements:**
-- PKCE support (RFC 7636) - Required
-- OAuth Discovery (RFC 8414) - Recommended
-- Dynamic Client Registration (RFC 7591) - Optional
-- Token refresh endpoint - Required
+### Builds
 
-**Security Expectations:**
-- HTTPS-only endpoints
-- Valid SSL/TLS certificates
-- Rate limiting on OAuth endpoints
-- Webhook signature verification (if applicable)
+- Launched Builds run in an isolated, workspace-scoped environment.
+- On the default launch path a Build's container runs as a non-root user with all Linux
+  capabilities dropped and no privilege escalation.
+- A Build's token (`CONDUCKTOR_APP_TOKEN`) is scoped to that Build in that workspace. One
+  Build cannot read another Build's data, and the token is accepted only by the data store
+  and the platform services the user has allowed that Build.
+- A Build calls the workspace's connectors by reference. It never holds their credentials;
+  Conducktor adds them on its side and replaces any echo of them in the answer with
+  `[redacted]`.
 
-**Data Handling:**
-- Minimal data collection principle
-- Clear data retention policies
-- GDPR compliance for EU users
-- User data deletion on request
+### API protection
 
-### For AI Client Applications (like ChatGPT)
+- Requests are rate limited per caller, with tighter limits on sign-in, registration and
+  OAuth endpoints.
+- Request bodies are size-limited.
+- Browser access is limited to an allowlist of origins (CORS).
+- In production every response carries HSTS (`Strict-Transport-Security`).
 
-**Integration Security:**
-- OAuth 2.0 for user authentication to Conducktor
-- Token storage in secure, httponly cookies
-- CORS properly configured
-- No credential exposure in client-side code
+### Governance and audit
 
-**Best Practices:**
-- Validate all MCP responses
-- Implement timeout handling
-- Use exponential backoff for retries
-- Log security events (without sensitive data)
+- Tool calls go through Conducktor's governance checks before they run: the caller's
+  permission, rate limits and argument validation.
+- Tool calls are audit-logged and recorded in the workspace's ledger.
 
-## Compliance & Certifications
+## For MCP server providers
 
-### Current Status
+If users connect your MCP server or API to Conducktor:
 
-- **GDPR:** Fully compliant
-- **SOC 2 Type II:** In progress (expected Q1 2026)
-- **HIPAA:** Available for BAA customers
-- **ISO 27001:** Planned for 2026
+- serve every endpoint over HTTPS;
+- support OAuth 2.1 with PKCE (S256) and token refresh;
+- publish RFC 8414 authorization server metadata, so Conducktor can discover your
+  endpoints and PKCE support;
+- optionally support RFC 7591 Dynamic Client Registration;
+- rate-limit your OAuth endpoints;
+- verify signatures on webhooks you send or receive.
 
-### Data Processing Agreements
+See the [OAuth guide](docs/authentication/OAUTH_GUIDE.md).
 
-We offer Data Processing Agreements (DPAs) for:
-- Enterprise customers
-- GDPR-covered organizations
-- HIPAA-covered entities
-- Custom compliance requirements
+## For AI clients connecting to Conducktor
 
-Contact: legal@conducktor.com
+- Use the OAuth authorization code flow with PKCE (S256). See
+  [Platform APIs § Authentication](docs/developers/PLATFORM_APIS.md#authentication).
+- Keep tokens server-side or in secure storage; never put them in client-side code.
+- Handle timeouts, and retry with exponential backoff.
+- Log security events without logging tokens or other secrets.
 
-## Security Updates & Advisories
+## Contact
 
-**Notification Channels:**
-- Email notifications to registered admin users
-- Security advisories published at: security.conducktor.com
-- Status page: status.conducktor.com
-- RSS feed: status.conducktor.com/feed
-
-**Severity Levels:**
-
-| Level | Description | Example |
-|-------|-------------|---------|
-| **Critical** | Immediate action required | Remote code execution, credential leakage |
-| **High** | Urgent update recommended | Authentication bypass, privilege escalation |
-| **Medium** | Update when convenient | XSS, CSRF vulnerabilities |
-| **Low** | Non-urgent, informational | Minor information disclosure |
-
-## Third-Party Security
-
-### Dependencies
-
-We maintain security for our dependencies:
-- Automated vulnerability scanning via Dependabot
-- Regular dependency updates
-- Security patches applied within SLA timeframes
-- Bill of Materials (SBOM) available on request
-
-### Infrastructure Providers
-
-**Google Cloud Platform (GCP):**
-- Shared responsibility model
-- GCP Security Command Center enabled
-- Regular infrastructure security audits
-- Compliance certifications inherited
-
-## Security Hardening Guide
-
-For self-hosted deployments (enterprise customers):
-
-### Environment Configuration
-
-```bash
-# Use strong encryption keys (minimum 32 bytes)
-TOKEN_ENCRYPTION_KEY=<generate-with-cryptography.fernet>
-JWT_SECRET_KEY=<generate-with-openssl-rand>
-
-# Enforce HTTPS
-FORCE_HTTPS=true
-
-# Restrict CORS origins
-ALLOW_ORIGINS=https://app.yourdomain.com
-
-# Enable rate limiting
-RATE_LIMIT_ENABLED=true
-RATE_LIMIT_PER_MINUTE=60
-```
-
-### Network Security
-
-- Deploy behind a reverse proxy (nginx, Cloudflare)
-- Use private subnets for database
-- Enable VPC peering for service communication
-- Implement network policies in Kubernetes
-
-### Database Security
-
-- Use strong database passwords (minimum 32 characters)
-- Enable SSL/TLS for database connections
-- Restrict database access to application subnet
-- Enable database audit logging
-
-## Security Contact
-
-**General Security Inquiries:** security@conducktor.com  
-**Vulnerability Reports:** security@conducktor.com  
-**Compliance Questions:** compliance@conducktor.com  
-**Legal/DPA Requests:** legal@conducktor.com
-
-**PGP Key:** Available at [keys.conducktor.com/security.asc](https://keys.conducktor.com/security.asc)
-
----
-
-**Last Updated:** November 18, 2025  
-**Version:** 1.0
+- Vulnerability reports and security questions: **security@conducktor.com**
+- Legal questions: **legal@conducktor.com**
+- Privacy questions: **privacy@conducktor.com**
