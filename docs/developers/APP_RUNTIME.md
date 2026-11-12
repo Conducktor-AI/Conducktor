@@ -471,6 +471,87 @@ spending limit needs no request: the workspace changes it on the Stack's page.
 | `403` | `service_off` / `not_allowed` | AI calls are turned off on the platform, or the workspace has not allowed this Build to use them |
 | `503` | `unavailable` | The model call did not complete, or AI calls are switched off for now; try again shortly |
 
+## Long-running jobs
+
+A Build stops after a while without visitors, and one request into it has a time limit, so
+work that takes longer (crawling a site, processing media or a large file, a long AI task)
+runs as a **job** the platform drives, through the platform service `jobs`. Never run it as
+a background thread or loop: nothing runs while the Build is stopped.
+
+1. Give the work its own `POST` endpoint, without path parameters, whose request body
+   declares `job_id`, `input`, `checkpoint` and `step`.
+2. Start a job from your server code with `jobs.start`. It answers at once with the job.
+3. The platform calls your endpoint step by step, starting the Build when it is stopped,
+   each time with the job's `input`, the `checkpoint` the previous step returned (`null`
+   the first time) and the step number. Each step does a bounded piece of the work and
+   answers:
+   - `{ "done": false, "checkpoint": <JSON>, "progress": "<text>" }` to continue;
+   - `{ "done": true, "result": <JSON>, "progress": "<text>" }` when the job is finished;
+   - `{ "error": "<text>" }` to fail the job.
+4. Read a job with `jobs.get` or `jobs.list` (status `queued`, `running`, `succeeded`,
+   `failed` or `cancelled`, the last progress line, the result or the error), and stop one
+   with `jobs.cancel`.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST $CONDUCKTOR_APP_SERVICES_URL/jobs/jobs.start` | `{ "arguments": { "call": "POST /jobs/crawl", "input"?: {...}, "name"?: "..." } }` → `{ "result": { "job": {...} } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/jobs/jobs.get` | `{ "arguments": { "job_id": "..." } }` → `{ "result": { "job": {...} } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/jobs/jobs.list` | `{ "arguments": { "status"?, "limit"?, "offset"? } }` → `{ "result": { "jobs": [...], "next_offset" } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/jobs/jobs.cancel` | `{ "arguments": { "job_id": "..." } }` → `{ "result": { "job": {...} } }` |
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+from conducktor_app import services
+
+app = FastAPI()
+
+class Step(BaseModel):
+    job_id: str
+    input: dict | None = None
+    checkpoint: dict | None = None
+    step: int
+
+@app.post("/crawl")
+def start_crawl(body: dict):
+    return services.jobs_start("POST /jobs/crawl", input={"site": body["site"]}, name="Crawl")
+
+@app.post("/jobs/crawl")
+def crawl_step(body: Step):
+    page = (body.checkpoint or {}).get("page", 0)
+    ...  # fetch and save a few pages, at most a few minutes of work
+    if finished:
+        return {"done": True, "result": {"pages": page}}
+    return {"done": False, "checkpoint": {"page": page + 10}, "progress": f"{page + 10} pages"}
+```
+
+A step can run again with the same checkpoint (after a timeout or a platform restart), so
+make every step safe to repeat. A job reaches only your Build's own endpoints, and a shared
+Build may run jobs.
+
+### Limits
+
+| Limit | Value |
+|-------|-------|
+| Time per step | 5 minutes |
+| Time per job, from its first step | 24 hours |
+| Steps per job | 10,000 |
+| Failed steps in a row before the job fails | 5 (retried after 30 s, 1, 2 and 4 minutes) |
+| Unfinished jobs per Build | 20; one step of a Build's jobs runs at a time |
+| `input` | 64 KB |
+| `checkpoint` and `result` | 256 KB each: save larger output in Drive or the App Data Store |
+| Finished jobs kept | 7 days |
+
+### Errors
+
+| Status | `code` | What it means |
+|--------|--------|---------------|
+| `422` | `invalid_argument` | `call` is not a `POST` path, or its endpoint does not declare `checkpoint` |
+| `404` | `not_found` | `call` is not one of this Build's endpoints, or no such job |
+| `413` | `too_large` | `input` is over 64 KB |
+| `429` | `limit_reached` | The Build already has 20 unfinished jobs |
+| `403` | `service_off` / `not_allowed` | Jobs are turned off on the platform, or the workspace has not allowed this Build to run them |
+
 ## Drive files in an installed copy
 
 When another workspace installs your Stack, its copy of your Build can use the Files
@@ -552,7 +633,8 @@ In practice:
 When these become available they will use the same `CONDUCKTOR_APP_TOKEN`, so code
 written against the token now will not need changes.
 
-Scheduled jobs are not available either: every Build runs as a long-running HTTP service.
+A Build runs as an HTTP service that stops when idle. For work on a schedule declare it in
+`conducktor.tools.json`, and for long work use [Long-running jobs](#long-running-jobs).
 
 ## Resources
 
