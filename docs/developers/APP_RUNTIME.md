@@ -35,6 +35,7 @@ On the default path a launched Build starts with this environment:
 | `CONDUCKTOR_INTERNAL_URL` | Platform-internal; do not use. The platform writes it after your config, so a value you set is replaced |
 | `CONDUCKTOR_API_URL` | Base URL of the Conducktor API. The platform writes it after your config, so a value you set is replaced |
 | `INSTANCE_TOKEN_REF` | Platform-internal; do not use. A reserved key: refused at `PUT` |
+| `CONDUCKTOR_DATA_DIR` | Only when the Build declares a disk (`environment.filesystem`): the folder whose files survive stops, restarts, relaunches and new versions. The platform writes it after your config, so a value you set is replaced |
 
 <!-- /platform-contract:injected-env -->
 
