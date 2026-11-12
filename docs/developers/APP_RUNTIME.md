@@ -199,6 +199,75 @@ store.flush()                   # write changed keys (also call it on shutdown)
 languages call the REST endpoints directly, in the same pattern; a scaffolded Next.js
 Build has `lib/platform-services.js` for the platform services.
 
+## Your own database
+
+When a Build's records have a shape worth querying (customers, orders, bookings, anything
+you filter, join or total), keep them in the Build's own SQL database, the platform
+service `db`, instead of the key/value store. Every Build gets a Postgres database of its
+own, with its own login, holding nothing but what the Build writes. The tables survive restarts, redeploys and relaunches, and are deleted with
+the Build. The Build never holds a password: Conducktor connects for it.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST $CONDUCKTOR_APP_SERVICES_URL/db/db.query` | Read with `{ "arguments": { "sql", "params"? } }`, run read-only → `{ "result": { "rows": [{...}], "row_count", "truncated" } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/db/db.execute` | Change with one statement (`CREATE TABLE`, `INSERT`, `UPDATE`, `DELETE`, `ALTER` …) in its own transaction → the same shape; `rows` holds what `RETURNING` returns |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/db/db.batch` | Run `{ "arguments": { "statements": [{ "sql", "params"? }, ...] } }` in ONE transaction: all take effect or none do → `{ "result": { "results": [...] } }` |
+
+- **`sql`** is one statement with `$1`, `$2`, … placeholders. Name tables plainly: they
+  live in the Build's own database. Two statements in one `sql` are refused; use `db.batch`.
+  Every call runs in its own transaction, so `BEGIN`, `COMMIT`, `ROLLBACK` and `SAVEPOINT`
+  are refused too.
+- **`params`** are the placeholders' values as JSON, converted to each column's type: ISO
+  text for dates and times (`"2026-11-11T09:00:00Z"`), an object or list for `json` and
+  `jsonb`, base64 for `bytea`. Rows come back as objects keyed by column name, with
+  `numeric` as text so no digit is lost.
+- Create tables at start with `CREATE TABLE IF NOT EXISTS`, in one `db.batch`, so a new
+  Build and a relaunched one both start ready.
+
+```python
+from conducktor_app import services
+
+services.db_batch([
+    {"sql": "CREATE TABLE IF NOT EXISTS orders (id serial PRIMARY KEY, customer text, "
+            "total numeric(10,2), placed timestamptz DEFAULT now())"},
+])
+services.db_execute("INSERT INTO orders (customer, total) VALUES ($1, $2)", params=["Ada", 42.5])
+rows = services.db_query(
+    "SELECT customer, sum(total) AS spent FROM orders GROUP BY customer ORDER BY spent DESC"
+)["rows"]
+```
+
+A shared Build may use its database: keep what a visitor saves under the
+`X-Conducktor-Visitor` name. An installed copy of your Stack gets its own empty database in
+the installing workspace; it never sees yours.
+
+### Limits
+
+| Limit | Value |
+|-------|-------|
+| Statements per call | 1 (`db.batch`: 50, in one transaction) |
+| Time per statement | 10 seconds |
+| Time per batch | 30 seconds, then the whole batch is undone |
+| Rows per reply | 1,000 (`truncated` is true when there were more; a batch's statements share it) |
+| Reply size | 4 MB |
+| Database size | 1 GB in all; past it only `DELETE`, `DROP` and `TRUNCATE` run |
+| Calls per minute | 600 per workspace |
+
+A Build may use only its own database and schema: no other database, no temporary tables,
+no extensions.
+
+### Errors
+
+| Status | `code` | What it means |
+|--------|--------|---------------|
+| `400` | `sql_error` | Postgres refused the statement; the message starts with its SQLSTATE |
+| `422` | `invalid_argument` | The SQL or a param is not valid; the message names which (`params[0]`, `statements[2]`) |
+| `408` | `timeout` | The statement ran longer than 10 seconds |
+| `429` | `busy` | Too many calls from this Build at once; retry |
+| `507` | `database_full` | The database is at 1 GB; delete rows or drop tables, and the next write gives the space back |
+| `403` | `service_off` / `not_allowed` | The database is turned off on the platform, or the workspace has switched it off for this Build |
+| `503` | `unavailable` | The database could not be reached; try again shortly |
+
 ## Calling the workspace's connectors
 
 A Build never holds a key for a service the workspace has connected. The user grants the
