@@ -57,15 +57,17 @@ https://mcp.conducktor.com/mcp
 | `GET /mcp/health` | Health check |
 | `DELETE /mcp/session` | End an MCP session |
 
-By default a client is shown two tools:
+A client is shown Conducktor's gateway tools, not the individual connector tools:
 
 - `ask_conducktor` takes a `command` in plain language. Conducktor works out which
   connector tools to use (including your Builds' tools), runs them through its governance
   checks, and returns the result or a follow-up question.
 - `send_to_conducktor` sends a file: Conducktor scans it, saves it to Drive and returns a
   receipt.
-
-The individual connector tools are not shown to the client.
+- `conducktor_vault` asks whether the client may sign in to a website with one of the
+  user's saved logins and, if not, returns a Conducktor link where the user can allow it
+  (or, with `revoke`, end it). It never returns passwords, cookies or tokens; consent
+  happens in the user's own Conducktor session.
 
 How to connect each client: <https://www.conducktor.com/docs>.
 
@@ -99,33 +101,40 @@ Per Build: values up to 256 KB (`413` above that), 1,000 keys (`409` above that)
 requests per 60 seconds (`429` above that). Load on start, work in memory, and write back
 periodically, rather than writing on every request.
 
-## Flow triggers (inbound events)
+## Inbound webhooks
 
-Your own systems can start a Conducktor **Flow** by posting to its trigger address:
+An outside service (a payment provider, a code host, your own system) can start a
+Conducktor **Flow** by sending it a webhook.
 
-```http
-POST /api/webhooks/flow-trigger/{trigger_id}
-```
+1. In Conducktor, create a webhook under **Connectors** (Data Source, then Webhook). Choose
+   a provider format where one is offered, or the Conducktor standard format below.
+   Conducktor shows the webhook's address and its signing secret **once**; enter them in
+   the sending service. The secret is kept in the workspace's Vault and cannot be read
+   again.
+2. Ask Conducktor to start a Flow from that webhook. A Build can also declare the Flow for
+   you (see [Runtime contract § Scheduled jobs and webhooks](APP_RUNTIME.md#scheduled-jobs-and-webhooks)).
 
-- Each trigger has its own address and its own signing secret, kept in the workspace's
-  Vault. No session or API key is involved; the signature is the credential.
-- The body must be a JSON object.
-- Sign each request: take the current Unix time in seconds as `t`, compute the
-  HMAC-SHA256 of `t`, a dot, and the raw body with the trigger's secret, and send
-  `X-Event-Signature: t=<t>,v1=<hex digest>`. A request signed more than 5 minutes ago is
-  refused.
+No session or API key is involved: the signature is the credential.
+
+**The Conducktor standard format.** Send a `POST` whose body is a JSON object. Take the
+current Unix time in seconds as `t`, compute the HMAC-SHA256 of `t`, a dot and the raw
+body with the webhook's secret, and send `X-Event-Signature: t=<t>,v1=<hex digest>`. A
+delivery signed more than 5 minutes ago is refused.
 
 ```bash
 BODY='{"event":"order.created","id":"1234"}'
 T=$(date +%s)
-SIG=$(printf '%s.%s' "$T" "$BODY" | openssl dgst -sha256 -hmac "$TRIGGER_SECRET" -hex | sed 's/^.*= //')
-curl -X POST "https://api.conducktor.com/api/webhooks/flow-trigger/$TRIGGER_ID" \
+SIG=$(printf '%s.%s' "$T" "$BODY" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.*= //')
+curl -X POST "$WEBHOOK_ADDRESS" \
   -H "Content-Type: application/json" \
   -H "X-Event-Signature: t=$T,v1=$SIG" \
   --data "$BODY"
 ```
 
-A bad signature answers `401`; a body that is not a JSON object answers `400`.
+A bad or stale signature answers `401`; a body that is not a JSON object answers `400`.
+
+Flow trigger addresses made before webhooks moved to **Connectors**
+(`POST /api/webhooks/flow-trigger/{trigger_id}`) keep working with the same format.
 
 ## API-Bridge (OpenAPI to tools)
 
@@ -152,8 +161,9 @@ Calls through a bridge are sent to your REST API with the auth you configured.
 | You have | Use |
 |----------|-----|
 | Code you want to run on Conducktor | A Build: [Package specification](APP_PACKAGE_SPEC.md) and [Build and deploy](BUILD_AND_DEPLOY.md) |
-| Builds, Assistants and knowledge to ship together | A Stack: [Stack authoring](STACK_AUTHORING.md) |
+| Builds, Assistants and knowledge to ship together | A Stack: [Stack package](STACK_PACKAGE.md) |
 | An MCP server you host | [Attach it as a connection](#attach-an-mcp-server-you-host) |
 | A REST API with an OpenAPI spec | [API-Bridge](#api-bridge-openapi-to-tools) |
-| Events that should start automations | [Flow triggers](#flow-triggers-inbound-events) |
+| Events that should start automations | [Inbound webhooks](#inbound-webhooks) |
+| A Stack you want every workspace to be able to install | [Publishing a Stack](PUBLISHING.md) |
 | An AI client or agent that should use Conducktor | The [MCP endpoint](#mcp-endpoint) and the [OAuth guide](../authentication/OAUTH_GUIDE.md) |

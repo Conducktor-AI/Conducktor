@@ -60,8 +60,8 @@ DELETE /api/builder/builds/{build_id}/config/{key}?workspace_id=<id>
 `PUT` replaces the whole list. See
 [Runtime contract § Your own config and secrets](APP_RUNTIME.md#your-own-config-and-secrets).
 
-Keep a Build running even when idle (the next launch applies it; this keeps billing
-compute while idle):
+To keep a Build running while it is idle, turn on always-on. The setting takes effect at
+the next launch, and the Build's compute is billed while it is idle:
 
 ```
 POST /api/builder/builds/{build_id}/always-on?workspace_id=<id>
@@ -93,12 +93,9 @@ POST /api/hosted/instances/{instance_id}/action
 `action` is `start` (scale back up), `stop` (scale to zero) or `restart` (rolling restart).
 A Build that is not always-on is scaled down when idle; `start` wakes it.
 
-## The retired `/api/apps` endpoints
+## Retired endpoints
 
-The `/api/apps` endpoints (`/api/apps`, `/api/apps/{app_id}`, `/api/apps/{app_id}/versions`,
-`/api/apps/{app_id}/build`, `/api/apps/{app_id}/deploy`, `/api/apps/deployments/*`) were
-removed on 2026-08-19 and answer `404`. They never ran a container build. Use the endpoints
-above:
+The older `/api/apps` endpoints have been removed and answer `404`. Use the endpoints above:
 
 | If you called | Use |
 |---------------|-----|

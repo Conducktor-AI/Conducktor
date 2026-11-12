@@ -5,7 +5,8 @@ Thanks for helping. This guide applies to every public repository in the Conduck
 ## Ways to help
 
 - **Report a bug** with an issue. Include what you did, what you expected, and what happened, plus the `stack.yaml` if one is involved.
-- **Suggest an improvement** with an issue, or start a Discussion if it is still an idea.
+- **Suggest an improvement** with an issue.
+- **Ask a question** with an issue, using the Question template.
 - **Send a fix or an example** with a pull request.
 
 Security problems are different: follow [SECURITY.md](SECURITY.md) and do not open a public issue.
@@ -14,7 +15,7 @@ Security problems are different: follow [SECURITY.md](SECURITY.md) and do not op
 
 1. Fork the repository and create a branch from `main`.
 2. Keep each pull request to one change.
-3. For a Stack example, make sure `stack.yaml` posts and installs cleanly into a fresh workspace, and that its README says what it installs.
+3. For a Stack example, make sure `stack.yaml` uploads and installs cleanly into a fresh workspace, and that its README says what it installs.
 4. Fill in the pull request template.
 
 A maintainer will review your pull request. We aim to respond within two working days.

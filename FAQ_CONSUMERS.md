@@ -5,9 +5,12 @@ it.
 
 ## What is Conducktor?
 
-An AI workspace made of Assistants and Stacks. A Stack holds the Builds, Assistants, Flows
-and connectors for one job. Everything with endpoints is a connector, and external MCP
-clients reach the workspace through `ask_conducktor`. See the [README](README.md).
+Your workspace, built around you: one place to build, connect and run your own tools,
+which you can use in the workspace or through the AI assistant you prefer. What you build
+lives in a Stack, which brings together the Builds, connections, tools and Assistants
+needed for a purpose. Add Stacks from Conducktor and other creators from the Stack library.
+Everything with endpoints is a connector, and outside AI clients reach the workspace
+through `ask_conducktor`. See the [README](README.md).
 
 ## How do I connect an AI client?
 
@@ -27,8 +30,11 @@ npx @modelcontextprotocol/inspector
 
 ## What tools does a client see?
 
-By default two: `ask_conducktor` for requests in plain language, and `send_to_conducktor`
-for files. Conducktor picks the connector tools for each request itself.
+Conducktor's gateway tools: `ask_conducktor` for requests in plain language,
+`send_to_conducktor` for files, and `conducktor_vault` to ask for a user's permission to
+sign in to a website with one of their saved logins. Conducktor picks the connector tools
+for each request itself. See
+[Platform APIs § MCP endpoint](docs/developers/PLATFORM_APIS.md#mcp-endpoint).
 
 ## How do I set up my workspace?
 
@@ -53,12 +59,18 @@ Stack's connector tools. Start with [Getting started](docs/developers/GETTING_ST
 Credentials are stored encrypted, and the UI shows masked values, so you can keep a stored
 credential or replace it without seeing it. See [SECURITY.md](SECURITY.md).
 
+## How do I publish a Stack for other people?
+
+Upload it to your workspace as a [Stack package](docs/developers/STACK_PACKAGE.md) (a ZIP with
+`stack.yaml` at its root), then send it for review from the developer
+portal. See [Publishing a Stack](docs/developers/PUBLISHING.md).
+
 ## How do Flows get made?
 
 Ask an Assistant in chat to build a Flow from a plain-language description, or use
 **+ New flow** on the Flows page and choose **Describe it** to fill the form for you.
 
-## Can I copy a setup between workspaces?
+## Can I copy a setup to another account?
 
 You can export your workspace's connections, policies and workflows as a bundle with
 `GET /api/workspaces/{workspace_id}/export`, and import a bundle into your workspace with
@@ -78,4 +90,5 @@ In **Integrations** in Conducktor.
 
 - Support: **support@conducktor.com**. Include the time of the problem and what you were
   doing.
+- Building and publishing Stacks: **developers@conducktor.com**.
 - Security issues: **security@conducktor.com** (see [SECURITY.md](SECURITY.md)).

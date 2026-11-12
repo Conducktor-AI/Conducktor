@@ -10,8 +10,12 @@ There are two ways to make one:
 
 - **Builder.** Describe what you want in Conducktor. Builder makes a private Stack for the
   project and proposes its parts; launching the project is its install.
-- **A manifest**, described on this page. You write one file, `stack.yaml`, and post it.
+- **A manifest**, described on this page. You write one file, `stack.yaml`, and upload it
+  in a ZIP, on its own or as a [Stack package](STACK_PACKAGE.md) with your Builds,
+  specialists' instructions and knowledge in folders.
   Conducktor creates a Stack **private to your workspace**, which you can then install.
+  A manifest Stack is also the kind you can send for review, so that every workspace can
+  install it from the Stack library (see [Publishing a Stack](PUBLISHING.md)).
 
 ## The manifest (`stack.yaml`)
 
@@ -24,10 +28,10 @@ tagline: Run your design business on autopilot
 description: |
   Everything a solo designer needs to run the business side.
 
-connectors:                              # existing catalog connectors
+connectors:                              # existing Conducktor connectors
   required: [figma, notion, gmail]
 
-roster:                                  # EXISTING catalog Assistants, hired on install
+roster:                                  # EXISTING Conducktor Assistants, hired on install
   - brand-strategist
   - social-media-manager
 roster_required: [brand-strategist]      # roster members the installer may not deselect
@@ -44,14 +48,17 @@ specialists:                             # NEW Assistants you define, created on
       Frameworks you apply: JTBD, category design, the StoryBrand arc.
     knowledge: [brand/voice.md]          # optional; must name a knowledge slice below
 
-skills:                                  # custom skills, installed as Flows
+custom_flows:                            # your own Flows
   invoice-client:
     name: Invoice a client
     description: Draft and send an invoice from a brief
-    workflow: { }                        # optional workflow definition
+    specialist: brand-strategist-pro     # optional; the Flow installs on this specialist
+    instructions: |                      # what the Assistant does when the Flow runs
+      Draft the invoice from the brief, show it for approval, then send it.
 
-apps:                                    # YOUR workspace's Builds, pinned by id
-  - build_id: "8f0c2d4e-…"               # a succeeded, launched Build of yours
+apps:                                    # Builds, pinned at upload
+  - path: builds/invoice-api             # a Build folder in the same ZIP (see Stack package)
+  - build_id: "8f0c2d4e-…"               # or a succeeded, launched Build you already have
 
 knowledge:                               # put in the workspace's Drive on install
   - title: Brand Voice Guide
@@ -63,7 +70,7 @@ knowledge:                               # put in the workspace's Drive on insta
     content: |
       Anchor high, offer three tiers...
 
-flows:                                   # catalog Flows, installed as Flows of their Assistants
+flows:                                   # Conducktor Flows, installed as Flows of their Assistants
   - client-onboarding
 
 onboarding:                              # optional guided-setup steps
@@ -73,7 +80,7 @@ onboarding:                              # optional guided-setup steps
                                          # with none, the install is immediate
 
 pricing:
-  price_cents: 0                         # must be 0; paid Stacks are not supported yet
+  price_cents: 0                         # optional; must be 0 (no purchase price)
 ```
 
 > **Refused fields.** These are rejected with `422` in a manifest you write: `surfaces`
@@ -87,26 +94,29 @@ pricing:
 | Field | Required | On install |
 |-------|----------|------------|
 | `schema_version` | — | Must be `1` |
-| `slug` | ✅ | `[a-z0-9-]`, 3–50 characters, unique within your workspace (another workspace may use the same slug). It cannot match a catalog Stack's slug, or a Stack Builder made in your workspace. The slug is a label; the Stack's identity is its `template_id`. |
+| `slug` | ✅ | `[a-z0-9-]`, 3–50 characters, unique within your workspace (another workspace may use the same slug). It cannot match the slug of a Stack in the Stack library, or a Stack Builder made in your workspace. The slug is a label; the Stack's identity is its `template_id`. |
 | `name` | ✅ | Display name, up to 100 characters |
 | `icon` | — | An emoji (default 📦) |
 | `tagline` / `description` | — | Shown on the Stack |
-| `connectors.required` | — | **Existing** catalog connector slugs, shown as "connect these" on install. An unknown slug is rejected with `422`, and so is a connector that belongs to a Platform Stack (it arrives only by installing that Stack). |
-| `roster` | — | **Existing** catalog Assistant slugs, hired into the workspace. An unknown slug is rejected with `422`. |
+| `connectors.required` | — | **Existing** Conducktor connector slugs, shown as "connect these" on install. An unknown slug is rejected with `422`, and so is a connector that belongs to one of Conducktor's own Stacks (it arrives only by installing that Stack). |
+| `roster` | — | **Existing** Conducktor Assistant slugs, hired into the workspace. An unknown slug is rejected with `422`. |
 | `roster_required` | — | Slugs from `roster` the installer may not deselect. Each must also be in `roster`. |
 | `specialists` | — | **New** Assistants you define, created in the installing workspace (see [Specialists](#specialists)) |
-| `skills` | — | Custom skills, installed as **Flows** on Conducktor's Flows tab, one per skill, named by the skill's `name`. Up to 100 skills; each definition at most 64 KB serialized. Skill ids at most 100 characters; each needs a `name` (at most 255 characters); optional `slug` at most 128 characters. A skill whose Flow name is already taken on Conducktor's tab by a Flow that is not this Stack's, whose tools are not in the workspace, or whose inputs a Flow cannot take is reported *unavailable* (`custom_skills_unavailable` / `skillsUnavailable`), not overwritten. A reinstall refreshes this Stack's Flows in place unless you edited one. |
-| `apps` | — | **Your own** Builds, pinned by id (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{build_id: <id>}`. Up to 20; a Build listed twice is rejected. |
+| `custom_flows` | — | Your own **Flows**, one per entry, named by its `name`: installed on the specialist an entry names with `specialist: <slug>` (one of this Stack's `specialists`), otherwise on Conducktor's Flows tab. Fields are listed in [Stack package § Flows](STACK_PACKAGE.md#flows). Up to 100; each definition at most 64 KB serialized. Keys at most 100 characters; each needs a `name` (at most 255 characters); optional `slug` at most 128 characters. A Flow whose name is already taken on its tab by a Flow that is not this Stack's, whose tools are not in the workspace, or whose inputs a Flow cannot take is reported as unavailable on the install, not overwritten. A reinstall refreshes this Stack's Flows in place unless you edited one. `skills` is the older name for this section and is still accepted; a manifest with both is refused. |
+| `apps` | — | Builds, pinned at upload (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{path: builds/<folder>}` for a Build in the same package (only inside a ZIP), or `{build_id: <id>}` for one you already have. Up to 20; a Build listed twice is rejected. |
 | `knowledge` | — | Text documents put in the installing workspace's Drive (see [Knowledge](#knowledge)) |
 | `pipeline` | — | How documents in your Stack's corpus are processed (see [Corpus processing pipeline](#corpus-processing-pipeline)). Needs `roster_required` or `specialists`. |
-| `flows` | — | Catalog Flow slugs. Each must be an **existing, active** catalog Flow; an unknown slug is rejected with `422`. |
-| `onboarding` | — | Guided-setup steps. A step's `required_connectors` must be existing catalog connector slugs (unknown ones are rejected with `422`). The setup runs only when at least one step lists connectors; the install happens at the **last** such step, once every listed connector is connected. Steps without connectors are informational. |
-| `pricing.price_cents` | — | Must be `0`; a nonzero price is rejected |
+| `flows` | — | Conducktor Flow slugs. Each must be an **existing, active** Conducktor Flow; an unknown slug is rejected with `422`. |
+| `onboarding` | — | Guided-setup steps. A step's `required_connectors` must be existing Conducktor connector slugs (unknown ones are rejected with `422`). The setup runs only when at least one step lists connectors; the install happens at the **last** such step, once every listed connector is connected. Steps without connectors are informational. |
+| `pricing.price_cents` | — | Optional. Must be `0`: a Stack has no purchase price, and a nonzero value is rejected. How published Stacks earn is described at <https://www.conducktor.com/developers>. |
 
 ### Builds in a Stack
 
-`apps` lists Builds from **your own workspace** by their `build_id`. When you post the
-manifest, each Build must:
+An `apps` entry with a `path` names a Build folder in the same package: Conducktor builds
+and launches it at upload (see [Stack package § Builds](STACK_PACKAGE.md#builds)).
+
+An entry with a `build_id` names a Build already in **your own workspace**. When you
+upload the manifest, each such Build must:
 
 - belong to your workspace (a Build from another workspace is rejected);
 - have `status` `succeeded` and a built image;
@@ -114,12 +124,12 @@ manifest, each Build must:
   a recorded runtime.
 
 Otherwise the manifest is rejected with `422` saying which condition failed. The Stack pins
-exactly that Build's image: later changes to the Build do not reach installs until you post
+exactly that Build's image: later changes to the Build do not reach installs until you upload
 the manifest again.
 
 On install, each Build is **started** in the installing workspace from the pinned image,
 and its OpenAPI operations are registered as tools on the Stack's connector. A Build that
-cannot be started is reported in `apps_unavailable`, with a reason, and the rest of the
+cannot be started is reported on the install, with a reason, and the rest of the
 install continues.
 
 ### Knowledge
@@ -132,31 +142,38 @@ roster Assistants your Stack installs can find these documents when they work.
 - `path`: a relative path such as `brand/voice.md`; folders are created as needed. No
   absolute paths and no `..`.
 - `content`: UTF-8 text (Markdown recommended), up to 256 KB per document and 100
-  documents per Stack.
+  documents per Stack. In a [Stack package](STACK_PACKAGE.md) you can leave `content` out
+  and put the text in `knowledge/<path>` instead.
 - `department`: optional; controls which specialists are linked to it. Defaults to
   `general`.
 
 ### Specialists
 
-`roster` hires **existing** catalog Assistants; `specialists` defines **new** ones. Each
+`roster` hires **existing** Conducktor Assistants; `specialists` defines **new** ones. Each
 specialist becomes an Assistant in the installing workspace, hired and ready.
 
 - `slug`: unique within your Stack (`[a-z0-9-]`, 3–50 characters).
 - `name`: display name.
 - `role`: a short label for what the specialist does.
+- `description`: optional, up to 1,000 characters; what it helps with, shown to the user.
+  Without it, the role is shown.
 - `level`: `intern`, `manager` or `executive` (default `intern`).
 - `instructions`: what the specialist is told (how it thinks, its focus, its approach).
   This becomes the Assistant's system prompt. (`persona` is the older name for this field
   and is still accepted; if you send both and they differ, the manifest is refused.)
 - `expertise`: optional; deeper method, appended to the instructions under an
-  `## Expertise` heading. Instructions and expertise together are capped at 64 KB; up to
+  `## Expertise` heading. In a [Stack package](STACK_PACKAGE.md), instructions and
+  expertise can live in `specialists/<slug>/instructions.md` and `expertise.md`, and the
+  specialist can have Skills: procedures it loads when a request needs one (see
+  [Stack package § A complete Assistant](STACK_PACKAGE.md#a-complete-assistant)). Instructions and expertise together are capped at 64 KB; up to
   50 specialists per Stack.
 - `knowledge`: optional list of knowledge `path`s from your `knowledge` section. A path
   that is not one of your slices is rejected. **Scope:** today this links the specialist to
   the workspace's whole Stack Knowledge collection, which holds the documents of *every*
   installed Stack, so it can find more than the paths you listed.
 
-The specialists you write are your own content and live in the installing workspace.
+The specialists you write run in the installing workspace. Their instructions and
+expertise are never shown to the people who install your Stack.
 
 ### Corpus processing pipeline
 
@@ -188,93 +205,40 @@ On install the pipeline is written to your Stack's corpus collections, provided 
 Assistant that owns the corpus was installed (a `roster_required` member hired, or at
 least one specialist created). If every specialist is skipped as unavailable and there is
 no `roster_required`, the pipeline is not written and the install does not warn yet, so
-check `specialists_unavailable` in the install result. Uninstalling removes the pipeline;
+check that the install created your specialists. Uninstalling removes the pipeline;
 it cannot be changed through collection settings. Declaring `claims` turns on fact
 extraction (model calls) for documents processed in that corpus after the pipeline is
 written. Files already in the corpus are not reprocessed when the pipeline is added or
-changed. An existing install does not pick up a changed pipeline by itself: post the
-manifest again, then re-run the install's steps (see [Revise](#revise)).
+changed. An existing install does not pick up a changed pipeline by itself: upload the
+manifest again, then apply the update to the install (see [Revise](#revise)).
 
 ## Add the Stack to your workspace
 
-Upload the file:
+Put `stack.yaml` at the root of a ZIP file, with any Builds, specialist files and
+knowledge files laid out as a [Stack package](STACK_PACKAGE.md). In Conducktor, open **Stacks**, choose
+**New Stack**, then **Import**, pick **ZIP file**, and choose your ZIP. Conducktor reads
+the manifest and creates the Stack, **private to your workspace** and in **Draft**.
 
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/manifest \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -F "file=@stack.yaml"
-```
-
-or send it as JSON:
-
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/manifest \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d @stack.json
-```
-
-The optional `workspaceId` query parameter names the owning workspace; it defaults to
-yours, and must be yours. A manifest larger than 32 MB is refused with `413`.
-
-Response (`201`):
-
-```json
-{
-  "slug": "freelance-designer",
-  "name": "Freelance Designer",
-  "template_id": "…",
-  "owner_workspace_id": "…",
-  "review_status": "draft",
-  "visibility": "workspace",
-  "components": {
-    "roster": 2, "specialists": 1, "connectors": 3, "surfaces": 0,
-    "skills": 1, "knowledge_slices": 2, "flows": 1
-  },
-  "component_status": {
-    "roster": "installed_on_install",
-    "specialists": "installed_on_install",
-    "connectors": "surfaced_on_install",
-    "surfaces": "none",
-    "skills": "installed_on_install",
-    "knowledge": "installed_on_install",
-    "flows": "installed_on_install"
-  },
-  "install_path": "/api/stacks/templates/…/install",
-  "submit_path": "/api/stacks/templates/…/submit"
-}
-```
-
-`template_id` is the Stack's id; keep it. `component_status` says what each component
-does on install. `submit_path` is deprecated; see [Who can see your Stack](#who-can-see-your-stack).
-
-Errors: `400` (no manifest, not UTF-8, unparseable, or no workspace), `403` (not your
-workspace), `409` (the slug is taken by a catalog Stack or by a Stack in your workspace
-that cannot be replaced), `413` (too large), `422` (a field is invalid; the response names
-the `field`).
+A manifest that cannot be accepted is refused with the reason, naming the field where
+there is one: a file that is not valid YAML or UTF-8, a `slug` already used by a Stack in the
+Stack library or by a Stack in your workspace that cannot be replaced, a field that breaks a rule
+above, or a package over the [size limits](STACK_PACKAGE.md#rules). A Build in the package
+that fails to build refuses the whole upload.
 
 ## Install it
 
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/templates/$TEMPLATE_ID/install \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"workspaceId": "'"$WORKSPACE_ID"'"}'
-```
-
-Optionally send `rosterSlugs` to hire only some of the roster (members of
-`roster_required` cannot be left out).
+Open **Stacks**, find your Stack and choose **Install**.
 
 | Component | On install |
 |-----------|------------|
 | Roster (existing Assistants) | **Hired** into the workspace |
 | Specialists (new Assistants) | **Created** as workspace Assistants, hired and ready |
-| Custom skills | **Installed** as Flows on Conducktor's Flows tab |
+| Custom Flows | **Installed** on the specialist each names, or on Conducktor's Flows tab |
 | Knowledge | **Written** to the workspace's Stack Knowledge collection in Drive |
 | Corpus processing pipeline | **Written** to your Stack's corpus collections when an owning Assistant was installed |
 | Builds (`apps`) | **Started** from the pinned image, with their tools on the Stack's connector |
 | Connectors | **Shown** as "connect these"; the user connects their own accounts |
-| Flows | **Installed** on the Flows tab of the Assistant each one belongs to (Conducktor's, when the catalog Flow names none). A Flow whose Assistant was left out of the install, or whose Assistant already has a Flow of that name, is skipped and reported in `flows_skipped`. |
+| Flows | **Installed** on the Flows tab of the Assistant each one belongs to (Conducktor's, when the Conducktor Flow names none). A Flow whose Assistant was left out of the install, or whose Assistant already has a Flow of that name, is skipped. |
 
 **When the install happens.** A Stack goes through guided setup only when there is
 something to connect: `connectors.required` with no custom `onboarding` steps (setup then
@@ -285,9 +249,8 @@ steps are only informational, **installs at once**. Custom steps replace the gen
 connect step, so connectors in `connectors.required` alongside informational-only steps
 are not shown; put them in a step's `required_connectors`.
 
-An immediate install answers with the installation's `id`, `status`, `skillsUnavailable`
-and a `cascade` object holding what each part did, including `flows_skipped`,
-`apps_installed` and `apps_unavailable`.
+Whatever a component could not do is reported on the install, for example a Flow skipped
+because its Assistant was left out, or a Build that could not be started.
 
 **Uninstall** reverses the install: the roster is un-hired, the specialists you wrote are
 removed, the knowledge documents are archived, the Flows the install made are removed, and
@@ -297,34 +260,31 @@ never destroys the user's own work.
 
 ## Revise
 
-Post the corrected manifest again with the **same `slug`**. The Stack is updated in place:
-the same `template_id`, reset to `draft`. To apply the change to an existing install, re-run
-its steps:
-
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/installations/$INSTALLATION_ID/install-skills \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN"
-```
+Upload the corrected package with the **same `slug`**. The Stack is updated in
+place: the same `template_id`, reset to Draft. A Stack that is in review or already in the
+Stack library cannot be replaced this way. Your installed copy then shows **Update
+available**; apply the update to bring it to the new version.
 
 ## Who can see your Stack
 
-A Stack you post is **private to your workspace**. `GET /api/stacks/templates` lists the
-catalog plus your workspace's own Stacks; each entry's `owner_workspace_id` is your
-workspace for yours and `null` for catalog Stacks.
+A Stack you upload is **private to your workspace**, and you can use it there with no
+review. Nobody outside your workspace can see it.
 
-Catalog Stacks (Platform Stacks) are added by Conducktor. A Stack your workspace makes
-stays in your workspace; it is not promoted to the catalog. The `submit` endpoint is
-deprecated: do not build on it.
+To make a Stack available to every workspace, send it for review from the developer
+portal. If it passes, Conducktor adds it to the Stack library as a **third-party** Stack: it
+stays yours, and it carries your workspace as its owner. You never publish to the
+Stack library directly. See [Publishing a Stack](PUBLISHING.md).
 
 ## Lifecycle summary
 
 ```
-write stack.yaml
-  → POST /api/stacks/manifest                         create the Stack (private, draft)
-  → POST /api/stacks/templates/{id}/install           install it: Assistants hired and created,
-                                                      Flows and knowledge added, Builds started,
-                                                      at once or after guided setup
-  → POST /api/stacks/manifest (same slug)             revise it in place
-  → POST /api/stacks/installations/{id}/install-skills  apply the revision to an install
-  → uninstall                                         reversed, keeping the user's own edits
+write stack.yaml (and any Builds, specialist files, knowledge files)
+  → upload the ZIP (Stacks → New Stack → Import)       Builds built, the Stack created,
+                                                       private, in Draft
+  → Install                                            Assistants hired and created, Flows and
+                                                       knowledge added, Builds started, at once
+                                                       or after guided setup
+  → upload again with the same slug                    revised in place
+  → uninstall                                          reversed, keeping the user's own edits
+  → developer portal: Send for review                  reviewed, then added to the Stack library
 ```

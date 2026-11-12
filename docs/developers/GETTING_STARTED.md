@@ -1,9 +1,7 @@
 # Getting Started
 
 > **Time:** about 15 minutes.
-> **You need:** a Conducktor account and its user-session bearer token (see
-> [Platform APIs § Authentication](PLATFORM_APIS.md#authentication)). Uploading needs a
-> workspace administrator; as the owner of your workspace, you are one.
+> **You need:** a Conducktor account.
 
 This walkthrough uploads a small HTTP service, launches it as a Build, and ends with its
 operations registered as tools that your Assistants, and MCP clients through
@@ -61,75 +59,31 @@ the package (`requirements.txt` listing `fastapi` selects the FastAPI runtime). 
 
 ## 3. Upload it
 
-```bash
-curl -X POST https://api.conducktor.com/api/builder/builds/upload \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -F "file=@hello-conducktor.zip"
-```
+In Conducktor, open **Stacks**, choose **New Stack**, then **Import**, and pick **ZIP file**.
+Choose `hello-conducktor.zip`.
 
-Conducktor validates the archive, puts your source in a Drive folder for the Build, and
-returns the Build. The upload also gives the Build its own private Stack. When a runtime is
-detected, the Build is ready to launch:
+Conducktor checks the archive, keeps your source in a Drive folder for the Build, and
+gives the Build its own private Stack. When it can tell which runtime to use, it builds
+the container image and launches the Build for you.
 
-```json
-{
-  "build_id": "…",
-  "conversation_id": "…",
-  "drive_folder_id": "…",
-  "app_name": "Hello Conducktor",
-  "app_version": "1.0.0",
-  "app_type": "mcp_server",
-  "runtime_type": "fastapi",
-  "file_count": 2,
-  "skipped_files": [],
-  "status": "succeeded",
-  "launch_path": "/api/builder/builds/…/launch?workspace_id=…"
-}
-```
+- The Build is named after the archive (`hello-conducktor.zip` becomes "Hello
+  Conducktor"). Its version is assigned for you and goes up with each upload of the same
+  name: the second upload is `1.1.0`.
+- When no runtime can be detected, the package is still saved, and Conducktor works out how
+  to run it. The Build can be launched once that succeeds.
+- A package that cannot be accepted is refused with the reason: an unsafe or invalid ZIP,
+  a package over the [size limits](APP_PACKAGE_SPEC.md#package-layout), a rejected compiled
+  executable, or a runtime's required files missing. Uploads also share your workspace's
+  build rate limit with Builder; if you reach it, try again later.
 
-- `app_name` is the Build's name, made from the archive's file name
-  (`hello-conducktor.zip` becomes "Hello Conducktor"). `app_version` is assigned by
-  Conducktor and counts up for each upload of the same name in your workspace: the second
-  upload is `1.1.0`. You cannot set either.
-- `app_type` is always `mcp_server`. The value is historical; it does not change how the
-  Build runs.
-- When no runtime can be detected, the package is still stored (`201`), with
-  `"status": "awaiting_build_recipe"`, `"runtime_type": null` and `"launch_path": null`.
-  Conducktor then tries to work out how to run it, and the Build becomes `succeeded`
-  (launchable) or `failed` with a reason. Launch refuses it until then.
-
-Keep `build_id`. A rejected package gets an error that says why:
-
-| Status | Meaning |
-|--------|---------|
-| `400` | Not a valid ZIP, or an unsafe one (path traversal, symlinks, ZIP64) |
-| `413` | Over the [size caps](APP_PACKAGE_SPEC.md#package-layout) |
-| `422` | A rejected compiled executable, a runtime marker file (such as `package.json`) that is not text, a file the malware scan flagged, or a detected runtime whose required files are missing |
-| `429` | Over your workspace's build rate limit, which uploads share with Builder; retry later |
-
-To add the Build to a Stack you already have instead of a new one, pass that Stack's id:
-`POST /api/builder/builds/upload?stack_template_id=<id>`. The Stack must be one your
-workspace built and has installed; otherwise the upload answers `404`.
+To add the Build to a Stack you already have, open that Stack and add the Build from there
+instead of using **New Stack**.
 
 ## 4. Launch it
 
-```bash
-curl -X POST "https://api.conducktor.com/api/builder/builds/$BUILD_ID/launch" \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN"
-```
-
-Launch builds the container image and starts it in your workspace's isolated environment.
-The response describes the running instance:
-
-```json
-{
-  "build_id": "…",
-  "instance_id": "…",
-  "external_endpoint": "…",
-  "runtime_type": "fastapi",
-  "status": "running"
-}
-```
+The upload launches the Build when it can. Launching builds the container image and starts
+it in your workspace's isolated environment. You can launch it again from its Stack in
+**Stacks** at any time, for example after you upload a new version.
 
 ## 5. Call it
 
@@ -137,8 +91,8 @@ After launch, Conducktor reads your `/openapi.json` and registers each operation
 on the Stack's connector. `GET /hello` is now a tool that:
 
 - Assistants in your workspace can call;
-- MCP clients connected to your workspace reach through `ask_conducktor`, at
-  `https://mcp.conducktor.com/mcp`.
+- AI clients connected to your workspace, such as Claude and ChatGPT, reach through
+  `ask_conducktor` at `https://mcp.conducktor.com/mcp`.
 
 Assistants choose tools by their descriptions, so give each operation a clear `summary`.
 
@@ -152,8 +106,11 @@ spec and launch again.
   calling the workspace's connectors.
 - [Build and deploy](BUILD_AND_DEPLOY.md): every endpoint for following and operating a
   Build.
-- [Stack authoring](STACK_AUTHORING.md): package your Build with Assistants and knowledge.
-- [Flow triggers](PLATFORM_APIS.md#flow-triggers-inbound-events): start a Flow from your
-  own systems.
+- [Scheduled jobs and webhooks](APP_RUNTIME.md#scheduled-jobs-and-webhooks): run your
+  Build on a schedule, or when an outside service sends an event.
+- [Stack authoring](STACK_AUTHORING.md) and [Stack package](STACK_PACKAGE.md): ship your
+  Build with Assistants and knowledge as one Stack.
+- [Publishing a Stack](PUBLISHING.md): send your Stack for review so every workspace can
+  install it.
 - [API-Bridge](PLATFORM_APIS.md#api-bridge-openapi-to-tools): turn an existing REST API
   into tools without deploying code.

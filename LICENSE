@@ -2,7 +2,7 @@
 
 Creative Commons Attribution 4.0 International License (CC BY 4.0)
 
-Copyright (c) 2025-2026 Conducktor Inc.
+Copyright (c) 2025-2026 Greenside Capital Ventures Inc., doing business as Conducktor
 
 This documentation is licensed under the Creative Commons Attribution 4.0 International License.
 
@@ -19,30 +19,17 @@ Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
 
 ---
 
-## Patent Notice
-
-This documentation may describe features covered by patents owned by Conducktor Inc. The Creative Commons license above does not grant any patent rights. For patent licensing inquiries, contact: legal@conducktor.com
-
 ## Trademark Notice
 
-"Conducktor" and the Conducktor logo are trademarks of Conducktor Inc. The Creative Commons license above does not grant trademark rights. Use of trademarks must comply with our Trademark Guidelines available at: https://www.conducktor.com/trademark-guidelines
+"Conducktor" and the Conducktor logo are trademarks of Greenside Capital Ventures Inc. The Creative Commons license above does not grant trademark rights.
 
 ## Third-Party Notices
 
-This documentation may reference third-party trademarks and products. All trademarks are property of their respective owners:
-
-- "ChatGPT" is a trademark of OpenAI, Inc.
-- "Linear" is a trademark of Linear Orbit, Inc.
-- "GitHub" is a trademark of GitHub, Inc.
-- "Claude" is a trademark of Anthropic, PBC
-- "Google Cloud Platform" is a trademark of Google LLC
-- "Microsoft Entra ID" is a trademark of Microsoft Corporation
-
-References to these products and services are for descriptive purposes only and do not imply endorsement, sponsorship, or affiliation.
+This documentation refers to third-party products and services, such as ChatGPT (OpenAI), Claude (Anthropic), GitHub, Hugging Face, Cursor and Visual Studio Code. All trademarks are the property of their respective owners. These references are for descriptive purposes only and do not imply endorsement, sponsorship or affiliation.
 
 ## Disclaimer
 
-THIS DOCUMENTATION IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL CONDUCKTOR INC. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS DOCUMENTATION IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL GREENSIDE CAPITAL VENTURES INC. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 

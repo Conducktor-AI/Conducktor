@@ -14,7 +14,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Post this stack.yaml
+        1. Upload this stack.yaml
         2. Install it
         3. ...
     validations:

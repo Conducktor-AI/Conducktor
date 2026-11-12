@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Ask a question
-    url: https://github.com/orgs/Conducktor-AI/discussions
-    about: Questions about building Stacks go to Discussions.
   - name: Report a security issue
     url: https://github.com/Conducktor-AI/Conducktor/blob/main/SECURITY.md
     about: Please report security problems privately, not as an issue.
+  - name: Help with your workspace or account
+    url: https://github.com/Conducktor-AI/Conducktor/blob/main/SUPPORT.md
+    about: Account and workspace problems go to Conducktor support, not to an issue.

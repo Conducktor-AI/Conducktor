@@ -11,29 +11,19 @@ A Stack is everything for one job, installed together: the Assistants that do th
 
 ## Quickstart
 
-```bash
-git clone https://github.com/Conducktor-AI/Conducktor.git
-cd Conducktor/stack-examples/hello-stack
+1. Download one example's folder, for example [`hello-stack`](hello-stack/), and put its
+   `stack.yaml` at the root of a ZIP file.
+2. In Conducktor, open **Stacks**, choose **New Stack**, then **Import**, pick **ZIP file**,
+   and choose your ZIP. The Stack is added to your workspace.
+3. Find it in **Stacks** and choose **Install**.
 
-curl -X POST https://api.conducktor.com/api/stacks/manifest \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -F "file=@stack.yaml"
-```
-
-The response includes a `template_id`. Install the Stack into your workspace:
-
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/templates/$TEMPLATE_ID/install \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"workspaceId": "'"$WORKSPACE_ID"'"}'
-```
-
-A Stack you add is private to your workspace. To change it, edit `stack.yaml` and post it again with the same `slug`.
+A Stack you add is private to your workspace. To change it, edit `stack.yaml` and upload it
+again with the same `slug`. When it is ready for everyone, see
+[Publishing a Stack](../docs/developers/PUBLISHING.md).
 
 ## Contributing
 
-Examples are welcome. Read [CONTRIBUTING.md](../CONTRIBUTING.md) first. Every example must be a valid `stack.yaml` that installs cleanly into a fresh workspace.
+Examples are welcome. Read [CONTRIBUTING.md](../CONTRIBUTING.md) first. Every example must be a valid `stack.yaml` that uploads and installs cleanly into a fresh workspace.
 
 ## Licence
 

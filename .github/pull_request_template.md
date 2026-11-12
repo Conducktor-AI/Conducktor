@@ -4,7 +4,7 @@
 
 ## How I checked it
 
-<!-- For a Stack: it posts and installs cleanly into a fresh workspace. -->
+<!-- For a Stack: it uploads and installs cleanly into a fresh workspace. -->
 
 ## Checklist
 

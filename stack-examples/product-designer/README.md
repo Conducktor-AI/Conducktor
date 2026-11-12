@@ -13,7 +13,7 @@ Turn a plain-language idea into a part brief a manufacturer can quote from.
 
 ## Try it
 
-From this folder, post the manifest and install it (see the [main README](../README.md#quickstart)). Then ask the Product Designer:
+Upload this folder's `stack.yaml` in a ZIP and install it (see the [Quickstart](../README.md#quickstart)). Then ask the Product Designer:
 
 > A wall bracket for a 12 kg shelf, powder-coated, fixed with two screws.
 
@@ -21,4 +21,4 @@ From this folder, post the manifest and install it (see the [main README](../REA
 
 - Replace the starter rules with your own design-for-manufacturing knowledge. That is where most of this Stack's value lives.
 - Tighten `instructions` to match the processes your manufacturers support.
-- Change `slug` and `name` before you post it.
+- Change `slug` and `name` before you upload it.

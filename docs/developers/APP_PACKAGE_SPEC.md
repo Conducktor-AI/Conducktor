@@ -4,14 +4,17 @@
 > (`POST /api/builder/builds/upload`, see [Getting started](GETTING_STARTED.md)), a ZIP
 > document or folder in Drive, a Hugging Face Space, and code Builder writes with you.
 
-A package is your source code as it already is. **There is no manifest and no
-Conducktor-specific file to add.** Conducktor works out how to build and run it from the
-files at the root.
+A package is your source code as it already is. **There is no manifest to add.**
+Conducktor works out how to build and run it from the files at the root. One optional
+file, `conducktor.tools.json`, declares scheduled jobs and webhooks; see
+[Runtime contract § Scheduled jobs and webhooks](APP_RUNTIME.md#scheduled-jobs-and-webhooks).
 
-> **`gt.yaml` is no longer used.** Packages used to need a `gt.yaml` at the root. Since
-> 2026-08-08 it is not required and not read: a package that still has one uploads
-> normally, and the file is kept as ordinary source. Nothing in it (`name`, `version`,
-> `type`, `runtime`, `entrypoint`, `port`, `env`, `resources`, `tools`) has any effect.
+> **A `stack.yaml` at the root makes the ZIP a Stack.** Conducktor then reads it as a
+> [Stack package](STACK_PACKAGE.md), and your Builds go in its `builds/` folder.
+
+> **`gt.yaml` is not read.** Older packages carried a `gt.yaml` at the root. It is no
+> longer required or read: a package that still has one uploads normally, the file is kept
+> as ordinary source, and nothing in it has any effect.
 
 ## Package layout
 
@@ -133,7 +136,9 @@ def lookup_contact(email: str):
 
 Every uploaded package is recorded with the type `mcp_server` (the `app_type` field of the
 upload response). The name is historical: the Build is a plain HTTP service and does not
-speak MCP. There is no other type to choose, and no scheduled-job type yet.
+speak MCP. There is no other type to choose. A Build that must run a job on a schedule
+declares it instead (see
+[Scheduled jobs and webhooks](APP_RUNTIME.md#scheduled-jobs-and-webhooks)).
 
 ## The `dockerfile` runtime
 
@@ -222,8 +227,10 @@ error.
 
 Before you upload:
 
-- [ ] Nothing Conducktor-specific to add. The name comes from the archive's file name,
-      the version is assigned for you, and the runtime is chosen from the root files.
+- [ ] No manifest to add. The name comes from the archive's file name, the version is
+      assigned for you, and the runtime is chosen from the root files.
+- [ ] Scheduled jobs and webhooks, if any, are declared in `conducktor.tools.json` at
+      the root.
 - [ ] The source follows its runtime's layout (FastAPI: `main.py` defining `app`).
 - [ ] No secrets and no `.git` directory in the archive.
 - [ ] **No `Dockerfile`** at the root or one level down, unless you mean to own the build.

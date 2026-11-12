@@ -9,18 +9,11 @@ The smallest useful Stack: one Assistant and one knowledge document.
 
 ## Try it
 
-From this folder:
-
-```bash
-curl -X POST https://api.conducktor.com/api/stacks/manifest \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -F "file=@stack.yaml"
-```
-
-Then install it with the `template_id` from the response (see the [main README](../README.md#quickstart)), open the Writing Coach and paste in a draft.
+Upload this folder's `stack.yaml` in a ZIP and install it (see the
+[Quickstart](../README.md#quickstart)). Then open the Writing Coach and paste in a draft.
 
 ## Make it yours
 
 - Change `instructions` to give the Assistant a different job.
 - Add more documents under `knowledge` and list their `path`s on the specialist.
-- Change `slug` and `name` before you post it, so it does not replace this example in your workspace.
+- Change `slug` and `name` before you upload it, so it does not replace this example in your workspace.

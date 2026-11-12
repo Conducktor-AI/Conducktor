@@ -5,13 +5,14 @@ Connect ChatGPT to Conducktor so it can work with your workspace: your connector
 
 ## What ChatGPT sees
 
-ChatGPT connects to one MCP server, `https://mcp.conducktor.com/mcp`, and by default sees
-two tools:
+ChatGPT connects to one MCP server, `https://mcp.conducktor.com/mcp`, and sees
+Conducktor's gateway tools:
 
 | Tool | What it does |
 |------|--------------|
-| `ask_conducktor` | Takes a plain-language request ("list my open Linear issues", "draft a reply to the last email from Sam"). Conducktor works out which connectors and tools to use, runs the steps, and asks a follow-up question when it needs one. |
+| `ask_conducktor` | Takes a plain-language request ("list my open issues", "draft a reply to the last email from Sam"). Conducktor works out which connectors and tools to use, runs the steps, and asks a follow-up question when it needs one. |
 | `send_to_conducktor` | Sends a file. Conducktor scans it, saves it to your Drive and returns a receipt. |
+| `conducktor_vault` | Asks whether ChatGPT may sign in to a website with one of your saved logins and, if not, gives you a Conducktor link where you can allow it. It never hands over passwords or other secrets. |
 
 ChatGPT does not see your individual connector tools. Conducktor chooses them and runs
 them through its governance checks (permissions, rate limits, argument validation), with
@@ -42,7 +43,7 @@ so you do not need a client ID or secret.
 Ask ChatGPT something that needs one of your connectors, for example:
 
 ```
-Use Conducktor to show my open issues in Linear.
+Use Conducktor to summarise my unread email from today.
 ```
 
 ChatGPT calls `ask_conducktor` with your request, and Conducktor answers with the result

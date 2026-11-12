@@ -46,10 +46,11 @@ knowledge:
       | Aluminium 5052 | Light enclosures | Bends well, corrosion resistant |
       | Stainless 304 | Food and outdoor parts | Harder to bend, no coating |
 
-skills:
+custom_flows:
   draft-part-brief:
     name: Draft a part brief
     description: Turn a short description of a part into a manufacturable part brief
+    specialist: product-designer
 
 onboarding:
   - title: Describe your first part

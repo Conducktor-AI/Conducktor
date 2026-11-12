@@ -56,26 +56,15 @@ On the older bundle path the platform injects <!-- platform-contract:injected-en
 
 ### Your own config and secrets
 
-Set your own variables and secrets on the Build:
+Set your own variables and secrets on the Build: open the Build in Conducktor and use its
+**Config & Secrets** card. Add an entry with a key, a value, its kind (below) and whether it
+is a secret. A secret's value is write-only: once saved, the card shows only a masked
+preview. Config is applied at the **next launch** and never changes a running Build.
+Config belongs to the Build's project, so later versions of the Build keep it.
 
-```bash
-curl -X PUT "https://api.conducktor.com/api/builder/builds/$BUILD_ID/config?workspace_id=$WORKSPACE_ID" \
-  -H "Authorization: Bearer $CONDUCKTOR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "entries": [
-      {"key": "LOG_LEVEL", "kind": "env", "isSecret": false, "value": "info"},
-      {"key": "STRIPE_API_KEY", "kind": "env", "isSecret": true, "value": "sk_live_…"}
-    ]
-  }'
-```
-
-They are resolved at launch and delivered to the container. Read them back with
-`GET /api/builder/builds/{build_id}/config?workspace_id=<id>` (secret values come back
-masked, as `valuePreview`), and remove one with
-`DELETE /api/builder/builds/{build_id}/config/{key}?workspace_id=<id>`. The `workspace_id`
-query parameter is **required** on all three. Config belongs to the Build's project, so
-later versions of the Build keep it.
+The same list is behind `GET`, `PUT` and `DELETE /api/builder/builds/{build_id}/config`
+(see [Build and deploy § Configure](BUILD_AND_DEPLOY.md#configure)); the `workspace_id`
+query parameter is **required** on all three.
 
 🔴 **`PUT` replaces the whole list.** Any stored entry you leave out is **deleted**, a
 secret's stored value with it, and secret values cannot be read back. To change one
@@ -107,7 +96,7 @@ and `file` totals are checked at launch, and a launch over either is refused. Th
 per `PUT` only.
 
 The launch request takes no environment variables, and there is no manifest to declare
-them in; the config endpoint is the way. For state your Build writes while it runs, use the
+them in; the Config & Secrets card is the way. For state your Build writes while it runs, use the
 data store. **Never put secrets in the package.**
 
 ### Settings an installer fills
@@ -183,8 +172,7 @@ separator, such as `:`.
 
 ### The SDK
 
-Every launched Build gets the `conducktor_app` Python module (SDK 1.6.0) at the root of its
-source. It wraps the data store with the recommended pattern (load on start, work in
+Every launched Build gets the `conducktor_app` Python module at the root of its source. It wraps the data store with the recommended pattern (load on start, work in
 memory, write back periodically), which keeps you well inside the rate limit:
 
 ```python
@@ -419,8 +407,8 @@ print(reply["text"])
 
 ### Who pays
 
-Every call is paid from the **workspace's Credits**, at the same markup as the workspace's
-assistants, whatever the workspace's AI Source list says. A call never runs on a person's
+Every call is paid from the **workspace's Credits**, at the same rates as the workspace's
+Assistants, whatever the workspace's AI Source list says. A call never runs on a person's
 own Claude subscription or own API key. The answer's `usage` reports the tokens the call
 used.
 
@@ -618,6 +606,90 @@ In practice:
   skipped at registration.
 - **Expect concurrent calls.** Several Assistants can call the Build at once.
 
+## Scheduled jobs and webhooks
+
+A Build does not run all the time: Conducktor stops it after a while without activity and
+starts it again when it is next called. Nothing runs inside a stopped Build, so a timer or
+background loop in your code cannot be relied on. For work that must happen on a schedule,
+or when an outside service sends an event, **declare** it, and Conducktor calls your Build
+for you, starting it first if it is stopped.
+
+Declarations go in a file named `conducktor.tools.json` at the root of your package:
+
+```json
+{
+  "schedules": [
+    {"name": "Morning digest", "call": "POST /jobs/digest",
+     "arguments": {"period": "day"}, "cron": "0 9 * * *"}
+  ],
+  "webhooks": [
+    {"name": "Payment received", "call": "POST /hooks/payment",
+     "fields": {
+       "amount": {"from": "data.object.amount", "type": "integer"},
+       "customer": "data.object.customer"
+     }}
+  ]
+}
+```
+
+When you launch the Build, Conducktor makes one **Flow** for each declaration, named after
+the Build and the job, and lists it on the Build's Stack. A relaunch updates those Flows in
+place and removes any whose declaration you deleted; a Flow the user has edited or switched
+off is left as it is. An entry that breaks a rule below is skipped, and the rest still
+apply.
+
+The endpoint a declaration calls must be one of the Build's tools: an operation in its
+`/openapi.json` with no path parameters. A `POST` operation must declare a request body
+with at least one field, or it is not registered as a tool.
+
+### Schedules
+
+| Field | Rule |
+|-------|------|
+| `name` | Required. The job's name, shown in the Flow's name |
+| `call` | Required. `"GET /path"` for a job that only reads, `"POST /path"` for one that changes something |
+| `cron` | Required. Five fields, in UTC, running at most once an hour: the minute field is a single number (`0 9 * * *` is 09:00 UTC every day) |
+| `arguments` | Optional. The JSON object each call sends, at most 2,000 characters |
+
+Up to 5 schedules per Build, one per endpoint.
+
+**A schedule does not start by itself.** The Flow suggests your `cron` in its description,
+and the job runs only once the user turns the schedule on in the Flow's settings. Tell the
+user which Flow to switch on. Make each job quick and safe to run twice, and keep what it
+produces in the data store.
+
+### Webhooks
+
+| Field | Rule |
+|-------|------|
+| `name` | Required. The webhook's name, shown in the Flow's name |
+| `call` | Required. `"POST /path"` |
+| `fields` | Required. 1 to 12 entries. Each key is a field of your endpoint's request body (a lowercase letter, then lowercase letters, digits or underscores, up to 40 characters; not `input` or `user_input`). Each value is where that field's value sits in the delivered event, as keys joined by dots (`data.object.amount`; a number indexes a list), up to 8 levels. Give an object with `from` and `type` when the value is not text; `type` is `string`, `number`, `integer`, `boolean`, `array` or `object` |
+
+Up to 5 webhooks per Build, one per endpoint.
+
+Your endpoint receives exactly the fields you named and nothing else from the delivery. A
+delivery that lacks one of them, or holds `null` there, is refused; an empty value, such
+as an empty list, is passed as it is.
+
+**Nothing can send to a webhook until the user sets one up.** In Conducktor they create a
+webhook under **Connectors** (Data Source, then Webhook), which shows its address and
+signing secret once, so they can enter them in the outside service. They then ask
+Conducktor to start your Build's Flow from that webhook. Conducktor checks the signature
+of every delivery before your Build is called (see
+[Platform APIs § Inbound webhooks](PLATFORM_APIS.md#inbound-webhooks)). Tell the user which
+Flow to connect, treat the fields as untrusted input, and make the endpoint quick and safe
+to receive twice.
+
+### In an installed copy
+
+The schedule and webhook Flows are made when you launch the Build in your own workspace,
+and in every workspace that installs your Stack, when its copy of the Build is wired up. An
+update to the Stack refreshes them, and uninstalling removes them. As in your own
+workspace, nothing is turned on: the installer switches each schedule on and sets up each
+webhook, as described above, so tell them which Flows to turn on in your Stack's
+onboarding.
+
 ## What a Build cannot do yet
 
 <!-- platform-contract:capabilities-roadmap -->
@@ -655,8 +727,7 @@ A Build runs as an HTTP service that stops when idle. For work on a schedule dec
   <!-- /platform-contract:runtime-resources -->
 
   Both launch paths apply this table. There is no per-Build override, and no field to
-  request one. A launch with `gpu=true` uses GPU resources instead, but only where GPU
-  Builds are enabled, which they are not by default.
+  request one.
 - A Build that needs more memory than its runtime's limit is stopped by the
   out-of-memory killer. Automatic memory growth after such a stop exists but is off by
   default; do not rely on it.

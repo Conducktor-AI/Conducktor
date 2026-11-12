@@ -1,0 +1,16 @@
+name: Question
+description: Ask how to build, package or publish a Stack
+labels: ["question"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: What do you want to know?
+      description: What you are trying to build, and where you are stuck.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: The docs you read and anything you ran. Remove any tokens, workspace ids or personal data first.
