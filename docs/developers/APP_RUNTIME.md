@@ -251,7 +251,7 @@ same checks as every platform service, plus the input guardrails chat uses.
 
 | Endpoint | Purpose |
 |----------|---------|
-| `POST $CONDUCKTOR_APP_SERVICES_URL/ai/ai.complete` | Ask a model with `{ "arguments": { "messages": [...], "system"?, "model"?, "max_tokens"?, "temperature"? } }` → `{ "result": { "text", "model", "stop_reason", "usage": { "input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens" } } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/ai/ai.complete` | Ask a model with `{ "arguments": { "messages": [...], "system"?, "model"?, "max_tokens"?, "temperature"?, "tools"?, "tool_choice"? } }` (a message's `content` is text or a list of text, image, PDF, tool call and tool result blocks) → `{ "result": { "text", "content", "model", "stop_reason", "usage": { "input_tokens", "output_tokens", "cache_read_tokens", "cache_write_tokens" } } }` |
 
 - **`messages`** is the conversation so far, oldest first: `{ "role": "user" | "assistant",
   "content": "<text>" }`, starting and ending with the user's message. The platform keeps no
@@ -262,7 +262,39 @@ same checks as every platform service, plus the input guardrails chat uses.
   too.
 - **`model`** is one of the Claude models the platform offers; leave it out for the
   platform's default. **`max_tokens`** bounds the answer (1,024 by default).
-- No streaming, tools or images yet.
+- **Images and PDFs.** A message's `content` can also be a list of blocks, in the shape
+  of Claude's Messages API: `{ "type": "text", "text": "..." }`, and in the user's
+  messages `{ "type": "image", "source": { "type": "base64", "media_type": "image/jpeg",
+  "data": "<base64>" } }` (JPEG, PNG, GIF or WebP) or `{ "type": "document", "source":
+  { "type": "base64", "media_type": "application/pdf", "data": "<base64>" } }`. Use it to
+  read a photo, a receipt or an invoice. An image or PDF is charged as the input tokens
+  the model reports. A file whose bytes are not the type it names is refused.
+- **Tools.** Send `tools` (each `{ "name", "description", "input_schema" }`, Claude's tool
+  definition shape) and optionally `tool_choice` (`{ "type": "auto" }`, `{ "type": "any" }`
+  or `{ "type": "tool", "name": "..." }`). The answer's `content` holds its text and any
+  `tool_use` blocks. When `stop_reason` is `"tool_use"`, append `{ "role": "assistant",
+  "content": <the answer's content> }` to the conversation, run each tool in your Build,
+  send the results back as one user message whose content starts with
+  `{ "type": "tool_result", "tool_use_id": "...", "content": "..." }` blocks (add
+  `"is_error": true` for a tool that failed), and call again with the same tools. The
+  platform never runs a Build's tools; every call of the loop is a separate, charged call.
+- **Streaming.** `POST $CONDUCKTOR_APP_SERVICES_URL/ai/ai.complete/stream` takes the same
+  body and answers with server-sent events while the model writes: `event: text` with
+  `{ "text": "<the next piece>" }`, then one `event: done` with `{ "result": <the same
+  answer ai.complete gives> }`. Use it for a chat screen that shows the reply as it is
+  written (`services.ai_stream(...)` in Python, `aiStream(...)` in the Next.js scaffold,
+  both yield the pieces). The text arrives a few sentences at a time, because each
+  piece passes the same content screen as a whole answer before your Build sees it; if
+  the screen stops a piece, the stream ends with `event: error` and `content_blocked`
+  (what came before it stands). A call refused before any text answers with the same status
+  and `code` as `ai.complete`; a failure after some text ends the stream with `event:
+  error` and `{ "status", "code", "message" }`. Both SDK helpers raise `stream_incomplete`
+  (502) if the connection ends before `done` or `error`, so a cut-off answer is never
+  taken as whole. A streamed answer never calls a tool and takes no
+  `tool_choice`: run the tool rounds with `ai.complete`, then stream the final answer with
+  the same `tools` (a conversation that holds tool calls needs them). If your Build stops reading,
+  the answer still finishes and is charged, so do not start a second call to retry a
+  stream your own screen dropped.
 
 ```python
 from conducktor_app import services
@@ -272,6 +304,46 @@ reply = services.ai_complete(
     system="You extract invoice fields and answer in one short paragraph.",
     max_tokens=400,
 )
+print(reply["text"])
+```
+
+```python
+import base64
+
+photo = base64.b64encode(open("receipt.jpg", "rb").read()).decode()
+reply = services.ai_complete(
+    [{"role": "user", "content": [
+        {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": photo}},
+        {"type": "text", "text": "List the merchant, date and total as JSON."},
+    ]}],
+    max_tokens=300,
+)
+```
+
+```python
+from fastapi.responses import StreamingResponse
+
+@app.post("/chat")
+def chat(body: dict):
+    return StreamingResponse(services.ai_stream(body["messages"], max_tokens=1000), media_type="text/plain")
+```
+
+```python
+tools = [{
+    "name": "find_orders",
+    "description": "Orders for a customer email.",
+    "input_schema": {"type": "object", "properties": {"email": {"type": "string"}}, "required": ["email"]},
+}]
+history = [{"role": "user", "content": "What did ana@example.com order last week?"}]
+while True:
+    reply = services.ai_complete(history, tools=tools, max_tokens=800)
+    history.append({"role": "assistant", "content": reply["content"]})
+    if reply["stop_reason"] != "tool_use":
+        break
+    history.append({"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": b["id"], "content": run_my_tool(b["name"], b["input"])}
+        for b in reply["content"] if b["type"] == "tool_use"
+    ]})
 print(reply["text"])
 ```
 
@@ -296,6 +368,11 @@ time.
 |-------|-------|
 | Messages per call | 200 |
 | Characters per call (all messages and the system prompt) | 400,000 |
+| Tools per call | 32 (100,000 characters together) |
+| Images and PDFs per call | 20 |
+| One image or PDF | 5 MB of base64 (a file of about 3.7 MB) |
+| All images and PDFs in a call | 20 MB of base64 |
+| Request body | 32 MB |
 | System prompt | 100,000 characters |
 | Answer length (`max_tokens`) | 8,192 tokens (1,024 by default) |
 | Calls per minute | 60 per workspace |
@@ -315,9 +392,9 @@ spending limit needs no request: the workspace changes it on the Stack's page.
 
 | Status | `code` | What it means |
 |--------|--------|---------------|
-| `422` | `invalid_argument` | A message, model or limit is not valid; the message says which |
-| `413` | `too_large` | The request is over the character limit |
-| `422` | `content_blocked` | The content policy blocked the request's text |
+| `422` | `invalid_argument` | A message, block, file, model or limit is not valid; the message says which |
+| `413` | `too_large` | The request is over the character limit, or its images and PDFs are over theirs |
+| `422` | `content_blocked` | The content policy blocked the request's text, or a streamed answer's next piece |
 | `429` | `spending_limit_reached` | The Stack used its AI spending limit for today |
 | `402` | `insufficient_credits` | The workspace's Credits or its own spending cap cannot cover the call |
 | `409` | `refused` | The per-minute rate limit, or another platform check, refused the call |
