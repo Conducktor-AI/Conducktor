@@ -47,7 +47,7 @@ Each Stack shows where it stands:
 | **Draft** | In your workspace only | Send it for review |
 | **In review** | Waiting for Conducktor's review | Wait. Sending again changes nothing |
 | **Changes requested** | The review found something to change; the portal shows the note | Fix it, upload the package again with the same `slug`, then **Send for review again** |
-| **In the catalogue** | In the Stack library: every workspace can install it | — |
+| **In the Stack library** | Every workspace can install it | — |
 
 ## What the review looks at
 
