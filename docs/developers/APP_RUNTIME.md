@@ -515,7 +515,9 @@ def crawl_step(body: Step):
 
 A step can run again with the same checkpoint (after a timeout or a platform restart), so
 make every step safe to repeat. A job reaches only your Build's own endpoints, and a shared
-Build may run jobs.
+Build may run jobs. An installed copy of your Stack runs its own jobs, on its own endpoints in
+the installing workspace; it never sees yours, and uninstalling the copy cancels its unfinished
+jobs.
 
 ### Limits
 
