@@ -264,6 +264,7 @@ not get to read it.
 | Part | The installer |
 |------|---------------|
 | A specialist's name, role and description | Sees them |
+| Whether a specialist is isolated (`isolated: true`) | Is told before installing |
 | Its instructions and expertise | Never sees them, in the app or through the API |
 | Its Skills | Sees which Skill was used; never sees the procedure |
 | A Flow | Sees its name, description and inputs, and can run and schedule it |

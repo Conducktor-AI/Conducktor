@@ -47,6 +47,7 @@ specialists:                             # NEW Assistants you define, created on
     expertise: |                         # optional; appended under a "## Expertise" heading
       Frameworks you apply: JTBD, category design, the StoryBrand arc.
     knowledge: [brand/voice.md]          # optional; must name a knowledge slice below
+    isolated: false                      # optional; true = works only from its own files, chats and memory
 
 custom_flows:                            # your own Flows
   invoice-client:
@@ -171,6 +172,17 @@ specialist becomes an Assistant in the installing workspace, hired and ready.
   that is not one of your slices is rejected. **Scope:** today this links the specialist to
   the workspace's whole Stack Knowledge collection, which holds the documents of *every*
   installed Stack, so it can find more than the paths you listed.
+- `isolated`: optional, `true` or `false` (default `false`). An isolated specialist works
+  only from its own files, its own chats and its own memory. It does not use the
+  workspace's shared memory, it reads the workspace's shared folder only if the person
+  gives it access, and nothing it learns is shared with the workspace's other Assistants. Use it when your specialist handles material that should
+  stay with it, such as one person's records. Things to know:
+  - The installer is told, before they install, which of your specialists are isolated.
+  - It is set when the specialist is first created in a workspace. Changing it in a later
+    version of your Stack does not change a specialist that is already installed.
+  - An isolated specialist cannot be added to another Stack's team, and it is left out
+    of group conversations with other Assistants.
+  - It must be written as a real boolean: `isolated: "true"` (a string) is refused.
 
 The specialists you write run in the installing workspace. Their instructions and
 expertise are never shown to the people who install your Stack.
