@@ -57,6 +57,7 @@ custom_flows:                            # your own Flows
     specialist: brand-strategist-pro     # optional; the Flow installs on this specialist
     instructions: |                      # what the Assistant does when the Flow runs
       Draft the invoice from the brief, show it for approval, then send it.
+    starts_on: client-signed             # optional; see "Flows that start each other"
 
 apps:                                    # Builds, pinned at upload
   - path: builds/invoice-api             # a Build folder in the same ZIP (see Stack package)
@@ -230,6 +231,36 @@ extraction (model calls) for documents processed in that corpus after the pipeli
 written. Files already in the corpus are not reprocessed when the pipeline is added or
 changed. An existing install does not pick up a changed pipeline by itself: upload the
 manifest again, then apply the update to the install (see [Revise](#revise)).
+
+### Flows that start each other
+
+A Flow in `custom_flows` can start on an event. Give it `starts_on`, an event name or a
+list of up to 10:
+
+```yaml
+custom_flows:
+  invoice-client:
+    name: Invoice a client
+    starts_on: client-signed             # or [client-signed, project-done]
+```
+
+A Flow emits an event from a step with the `event_emit` tool (`event` and optional
+`data`). When any Flow in the workspace emits `client-signed`, `Invoice a client` starts
+with the event's data as its trigger data. The emitting Flow can come from your Stack,
+another Stack, or the workspace itself, so Stacks can hand work to each other by agreeing
+on event names. Flows starting each other stop after 5 in a row.
+
+- An event name is 1–32 lowercase letters, digits, `-` and `_`, starting with a letter or
+  digit. Any other value is rejected with `422`.
+- The install sets these up as event listeners that belong to the Stack, and they are
+  listed under **Events** on the Flow's page. The runs they start are the runs of the
+  person who installed the Stack; if that person leaves the workspace, the listeners stop
+  starting runs.
+- Runs they start are not pre-approved: a step that asks for approval waits for a person.
+- A listener that cannot be set up (for example, its Flow was not installed) is reported in
+  the install's `warnings`; the rest of the install continues.
+- Uninstalling the Stack removes its listeners. A reinstall or an update sets up the ones
+  the manifest now declares and removes the ones it dropped.
 
 ## Add the Stack to your workspace
 
