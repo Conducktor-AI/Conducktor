@@ -47,6 +47,7 @@ specialists:                             # NEW Assistants you define, created on
     expertise: |                         # optional; appended under a "## Expertise" heading
       Frameworks you apply: JTBD, category design, the StoryBrand arc.
     knowledge: [brand/voice.md]          # optional; must name a knowledge slice below
+    connectors: [hubspot]                # optional; the connectors it starts with
     isolated: false                      # optional; true = works only from its own files, chats and memory
 
 custom_flows:                            # your own Flows
@@ -183,6 +184,12 @@ specialist becomes an Assistant in the installing workspace, hired and ready.
   - An isolated specialist cannot be added to another Stack's team, and it is left out
     of group conversations with other Assistants.
   - It must be written as a real boolean: `isolated: "true"` (a string) is refused.
+
+- `connectors`: optional list of connector slugs this specialist works with. Without it,
+  the specialist can use every connector in the installing workspace. With it, the
+  specialist starts with only the workspace's connections of those connectors switched on;
+  the rest, and connectors added later, start off. People can switch any of them on or off
+  in the **Connectors** section of the specialist's page.
 
 The specialists you write run in the installing workspace. Their instructions and
 expertise are never shown to the people who install your Stack.
