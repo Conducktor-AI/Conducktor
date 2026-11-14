@@ -564,6 +564,95 @@ at the top of the installing workspace's Workspace folder and granted to the cop
 or while Files is off, Files answers `403 not_allowed` or finds nothing, so handle both
 in your app.
 
+## Searching Drive by meaning
+
+A Build can find passages, by meaning, in the Drive files it may read: its own Build
+folder and the folders the user granted it, the same reach as `files`. It uses the Build's
+Drive permission, so it never reaches a file `files` could not.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST $CONDUCKTOR_APP_SERVICES_URL/knowledge/knowledge.search` | `{ "arguments": { "query", "folder_id"?, "limit"? } }` → `{ "result": { "passages": [{ "text", "truncated", "file_id", "file_name", "folder_id", "similarity" }] } }`, best first |
+
+- `query` is plain words, up to 2,000 characters. `folder_id` limits the search to one
+  folder the Build may read and everything below it. `limit` is 1 to 20 (default 8).
+- `similarity` is 0 to 1, or `null` for a passage found by an exact word.
+- A file is found once the platform has indexed it, shortly after it is saved. To add
+  knowledge, save a file with `files.upload_url`.
+- Each search is charged to the workspace's Credits (the query's embedding).
+
+```python
+from conducktor_app import services
+
+for p in services.knowledge_search("refund policy for annual plans", limit=5)["passages"]:
+    print(p["file_name"], p["text"][:200])
+```
+
+| Status | `code` | What it means |
+|--------|--------|---------------|
+| `422` | `invalid_argument` | No query, or a bad `limit` or `folder_id` |
+| `403` | `not_permitted` | `folder_id` is not one the Build may read |
+| `402` | `insufficient_credits` | The workspace has no Credits left or is past its spending cap |
+
+## A browser of its own
+
+A Build can open public web pages in a headless browser: read a page after its scripts
+run, take a picture of it, or click through it. Every call starts a fresh, isolated
+browser and ends it before answering, so nothing carries over between calls (no cookies,
+no open page): put the steps of one task in one `browser.run`. To act signed in as the
+user, use the saved-login sign-in instead.
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.read` | `{ "arguments": { "url" } }` → `{ "result": { "url", "title", "status_code", "text", "links", "buttons", "inputs" } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.screenshot` | `{ "arguments": { "url", "full_page"? } }` → `{ "result": { "url", "title", "status_code", "image", "width", "height" } }`, `image` a `data:image/png;base64,…` URL |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.run` | `{ "arguments": { "steps": [...] } }` → `{ "result": { "ok", "url", "title", "steps": [...] } }`, one result per step run |
+
+A step is `{ "action", … }`: `open` `{url}` (always first), `click` `{selector}`, `type`
+`{selector, text}`, `press` `{key}` (`"Enter"`), `select` `{selector, value}`, `wait_for`
+`{selector}`, `read` `{}`, `screenshot` `{full_page?}`. `open`, `click`, `select` and
+`wait_for` take an optional `timeout_ms` (up to 30,000). Selectors are CSS; `browser.read`
+lists one for every link, button and field. The run stops at the first step that fails,
+and that step's result carries its `error`.
+
+```python
+from conducktor_app import services
+
+out = services.browser_run([
+    {"action": "open", "url": "https://example.com/search"},
+    {"action": "type", "selector": "input[name=q]", "text": "standing desk"},
+    {"action": "press", "key": "Enter"},
+    {"action": "wait_for", "selector": ".results"},
+    {"action": "read"},
+])
+if out["ok"]:
+    page = out["steps"][-1]
+```
+
+### Limits
+
+| Limit | Value |
+|-------|-------|
+| Steps per `browser.run` | 20 |
+| Time to start a browser | 150 seconds |
+| Time for the steps | 120 seconds in all |
+| Page text per read | 10,000 characters; 100 links, 50 buttons, 50 fields |
+| Browsers open at once | 2 per Build |
+| Calls per minute | 20 per workspace |
+| Reachable | Public `http://` and `https://` pages only |
+
+Browser time is charged to the workspace's Credits like any platform browser session.
+
+### Errors
+
+| Status | `code` | What it means |
+|--------|--------|---------------|
+| `422` | `invalid_argument` | A bad URL or step; the message names the step |
+| `502` | `page_failed` | `browser.read` / `browser.screenshot`: the page could not be opened or captured |
+| `408` | `timeout` | The steps ran longer than 120 seconds |
+| `429` | `busy` / `spending_limit_reached` | Two browsers already open for this Build, or the workspace may not spend more |
+| `503` | `unavailable` | No browser could be started just now; try again shortly |
+
 ## Network
 
 On the default path Conducktor **tries** to apply a network policy to the Build. It is
@@ -698,13 +787,11 @@ onboarding.
 
 | Not yet available to app code | Workaround today | Status |
 |------------------------------|------------------|--------|
-| Read/write the workspace knowledge plane (Context Kernel) | Keep app state in the App Data Store | Roadmap |
-| Drive a headless browser (the platform's Browser Automation tools) | Grant the Browser Automation connector to the Build and call its tools (navigate, screenshot, extract) as a connector call. To act signed in as the user, sign in first with the saved-login sign-in (`logins`, `services.sign_in`) and pass the browser session's context id it returns to those calls | Roadmap |
 
 <!-- /platform-contract:capabilities-roadmap -->
 
-When these become available they will use the same `CONDUCKTOR_APP_TOKEN`, so code
-written against the token now will not need changes.
+Anything listed here will use the same `CONDUCKTOR_APP_TOKEN` when it becomes available, so
+code written against the token now will not need changes.
 
 A Build runs as an HTTP service that stops when idle. For work on a schedule declare it in
 `conducktor.tools.json`, and for long work use [Long-running jobs](#long-running-jobs).
