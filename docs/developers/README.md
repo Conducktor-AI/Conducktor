@@ -51,7 +51,7 @@ to Conducktor and for MCP servers that users connect.
 | **Runtime** | Container build, hosting in an isolated, workspace-scoped environment, launch, stop and restart |
 | **Tools** | Each OpenAPI operation registered as a tool on the Stack's connector |
 | **Data store** | A per-Build key/value store with its own token and an SDK client |
-| **Database** | Its own SQL database, reached through the platform ([Runtime contract § Your own database](APP_RUNTIME.md#your-own-database)) |
+| **Database** | Its own SQL database, shared with the other Builds of its Stack, reached through the platform ([Runtime contract § Your own database](APP_RUNTIME.md#your-own-database)) |
 | **Long-running jobs** | Work that runs in steps beyond one request, with progress and checkpoints ([Runtime contract § Long-running jobs](APP_RUNTIME.md#long-running-jobs)) |
 | **Files** | Read and write the Build's own Drive folder, and the folders the user grants |
 | **Connectors** | Call the workspace connectors the user grants, without holding their credentials |

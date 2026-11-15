@@ -137,7 +137,9 @@ settings could not be applied.
 
 `CONDUCKTOR_APP_TOKEN` is a signed bearer token scoped to exactly one Build in one
 workspace. The scope comes from the token, never from request parameters, so one Build
-cannot read another Build's data, even in the same workspace.
+cannot read another Build's data, even in the same workspace. The one exception is the
+Builds of the same Stack: they share one data store, one database and one own folder
+(see [Builds in one Stack share their data](#builds-in-one-stack-share-their-data)).
 
 The token is accepted by the **data store** (`/api/app-data`) and by the **platform
 services** at `CONDUCKTOR_APP_SERVICES_URL` (`/api/app-services`), each only once the user
@@ -229,6 +231,33 @@ rows = services.db_query(
 A shared Build may use its database: keep what a visitor saves under the
 `X-Conducktor-Visitor` name. An installed copy of your Stack gets its own empty database in
 the installing workspace; it never sees yours.
+
+### Builds in one Stack share their data
+
+Every Build in one Stack uses the same database, the same data store and the same own
+folder. This holds in your own workspace while you build the Stack and in every
+workspace that installs it, so what you test is what installers run:
+
+- **In your workspace,** the Stack's first Build keeps its data. When you add a second
+  Build to the Stack, the new Build uses the first one's database, data store and folder.
+- **In an installed copy,** all of the Stack's Builds start on one empty database and
+  data store, and share the Stack's folder.
+- **Only the data is shared in your workspace.** Each Build there keeps its own token,
+  Drive folder and connector grants. In an installed copy those are the Stack's, set on
+  its page.
+
+So plan the Stack's data together:
+
+- **Name tables and keys for the Stack, not the Build.** If two Builds create `orders`, they
+  write to the same table. Prefix a table or key only one Build uses (`crm_notes`).
+- **Let one Build own each table's structure.** It runs the `CREATE TABLE IF NOT EXISTS`
+  and `ALTER`; the other Builds read and write rows. Postgres transactions keep writes from
+  several Builds safe; use `db.batch` when a change touches several rows that must agree.
+- **The limits are the Stack's:** one 1 GB database, 1,000 data store keys and 600
+  database calls a minute for all its Builds together.
+- **Deleting one Build keeps the shared data** while another Build of the Stack still uses
+  it. Deleting the last Build deletes the database, and the folder too when you choose to
+  delete its files.
 
 ### Limits
 
@@ -555,6 +584,19 @@ is **the Stack's folder** in the installing workspace, made at install, which it
 always read and write; leave `folder_id` out to use it. Every Build in your Stack shares
 that folder and the same set of other folders. A member can add more of their folders on
 the Stack's page, read or read and write, or switch Files off.
+
+In your own workspace, the Builds of one Stack share an own folder too: the Builder folder
+of the Stack's first Build. Use files for documents people open (reports, exports,
+imports), not for state several Builds change:
+
+- **Give each Build its own subfolder to write in** (`files.create_folder`), so no two
+  Builds ever write the same file. Every Build can read every subfolder.
+- **Saving a file under a name already in the folder makes a new version of it**, and a
+  saved file appears only after its virus scan (`files.upload_status`). So the last save
+  wins, and there is no lock.
+- **To hand a file to another Build,** save it under a new name (add a time or an id), then
+  add a row naming it to a table in the shared database. The other Build reads the table to
+  find new files.
 
 To give installers more than the Stack's folder, declare the folders your Build needs:
 tell the Builder, for example *"installers get an Exports folder it can write"*. Each
