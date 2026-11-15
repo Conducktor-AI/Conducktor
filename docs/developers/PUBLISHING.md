@@ -62,6 +62,11 @@ Conducktor's own Stacks. Every workspace can then install it and use it on the w
 Conducktor's mobile apps, and from AI clients such as Claude and ChatGPT through
 Conducktor.
 
+When you send a Stack for review, Conducktor keeps its own copy of what it reviews: each
+Build's image stays in Conducktor's registry, and Conducktor stores the source files that
+image was built from. Workspaces that installed your Stack keep running exactly what was
+reviewed, even if you later change or delete those Builds in your own workspace.
+
 While a Stack is in review or in the Stack library, uploading its package again is refused.
 To change a published Stack, contact **developers@conducktor.com**.
 
