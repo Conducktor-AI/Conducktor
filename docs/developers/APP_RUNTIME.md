@@ -259,6 +259,20 @@ So plan the Stack's data together:
   it. Deleting the last Build deletes the database, and the folder too when you choose to
   delete its files.
 
+**A Stack that held several Builds before they shared data** has their data brought
+together once:
+
+- The other Builds' tables and data store keys are copied into the first Build's. A table
+  with the same name and the same columns in two Builds gets both Builds' rows. A key both
+  keep with the same value is kept once.
+- The first Build's folder becomes the Stack's folder. Each other Build can still read and
+  write its own folder, so the files it saved stay where they are.
+- If the data can't be brought together, nothing is copied and each Build keeps its own
+  data, as before. You get a notice that says why. The usual causes are two rows with the
+  same key in tables that get merged, one name used for different tables or values, and a
+  view, function or trigger in a Build's database. After you change one of the Builds, the
+  copy runs again on its own.
+
 ### Limits
 
 | Limit | Value |
