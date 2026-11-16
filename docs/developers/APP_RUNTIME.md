@@ -642,13 +642,13 @@ A Build can open public web pages in a headless browser: read a page after its s
 run, take a picture of it, or click through it. Every call starts a fresh, isolated
 browser and ends it before answering, so nothing carries over between calls (no cookies,
 no open page): put the steps of one task in one `browser.run`. To act signed in as the
-user, use the saved-login sign-in instead.
+user, see [Signed in with a saved login](#signed-in-with-a-saved-login) below.
 
 | Endpoint | Purpose |
 |----------|---------|
-| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.read` | `{ "arguments": { "url" } }` → `{ "result": { "url", "title", "status_code", "text", "links", "buttons", "inputs" } }` |
-| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.screenshot` | `{ "arguments": { "url", "full_page"? } }` → `{ "result": { "url", "title", "status_code", "image", "width", "height" } }`, `image` a `data:image/png;base64,…` URL |
-| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.run` | `{ "arguments": { "steps": [...] } }` → `{ "result": { "ok", "url", "title", "steps": [...] } }`, one result per step run |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.read` | `{ "arguments": { "url", "session"? } }` → `{ "result": { "url", "title", "status_code", "text", "links", "buttons", "inputs" } }` |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.screenshot` | `{ "arguments": { "url", "full_page"?, "session"? } }` → `{ "result": { "url", "title", "status_code", "image", "width", "height" } }`, `image` a `data:image/png;base64,…` URL |
+| `POST $CONDUCKTOR_APP_SERVICES_URL/browser/browser.run` | `{ "arguments": { "steps": [...], "session"? } }` → `{ "result": { "ok", "url", "title", "steps": [...] } }`, one result per step run |
 
 A step is `{ "action", … }`: `open` `{url}` (always first), `click` `{selector}`, `type`
 `{selector, text}`, `press` `{key}` (`"Enter"`), `select` `{selector, value}`, `wait_for`
@@ -671,6 +671,36 @@ if out["ok"]:
     page = out["steps"][-1]
 ```
 
+### Signed in with a saved login
+
+`services.sign_in(site)` signs in on the platform browser with the saved login the user
+granted this Build for `site`, and answers a `context_id`. Pass it as `session` to
+`browser.run`, `browser.read` or `browser.screenshot`: that call restores the signed-in
+browser (its cookies and storage, kept by the platform under this Build's grant, never
+shown to the app) and runs its steps there. Nothing is saved back, so a signed-in
+session lasts 30 minutes from the sign-in; call `sign_in` again after that, or when a
+call answers `session_ended`.
+
+With `session`, a call opens only `https://` pages of that login's own site, presses
+only single keys (a character, `Enter`, `Tab`, arrows and the like), and every page it
+loads stays on that site. The grant is checked before the browser starts and before
+every step: revoking the site, replacing its login, changing its password, or turning
+off the Build's saved-login permission ends the session at the next step.
+
+```python
+from conducktor_app import services
+
+answer = services.sign_in("portal.example")
+if answer["status"] == "success":
+    out = services.browser_run(
+        [{"action": "open", "url": "https://portal.example/account"}, {"action": "read"}],
+        session=answer["context_id"],
+    )
+```
+
+A Build granted the Browser Automation connector signs in on that connector instead,
+and drives the session it gets back with that connector's tools.
+
 ### Limits
 
 | Limit | Value |
@@ -689,7 +719,8 @@ Browser time is charged to the workspace's Credits like any platform browser ses
 
 | Status | `code` | What it means |
 |--------|--------|---------------|
-| `422` | `invalid_argument` | A bad URL or step; the message names the step |
+| `422` | `invalid_argument` | A bad URL or step; the message names the step. With `session`: an `http://` page, a page off the login's site, a key combination, or a session id `sign_in` did not return on the platform browser |
+| `410` | `session_ended` | With `session`: this Build may no longer use that sign-in (see above), or its 30 minutes are over; call `sign_in` again |
 | `502` | `page_failed` | `browser.read` / `browser.screenshot`: the page could not be opened or captured |
 | `408` | `timeout` | The steps ran longer than 120 seconds |
 | `429` | `busy` / `spending_limit_reached` | Two browsers already open for this Build, or the workspace may not spend more |
