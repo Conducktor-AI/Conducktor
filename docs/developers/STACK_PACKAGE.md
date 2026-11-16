@@ -30,6 +30,11 @@ the upload names the Build at fault.
 A package is uploaded from **New Stack** only. A ZIP with `stack.yaml` at its root
 uploaded through **Add a Build** on an existing Stack is refused.
 
+An AI assistant connected to Conducktor can send the same ZIP with `send_to_conducktor`
+and purpose `build`. It goes through the same checks and import, and the assistant asks
+again until the Stack is filed. Sent this way, a package only creates a Stack: a package
+whose `slug` your workspace already has is refused, so revise it from **New Stack**.
+
 ## Layout
 
 ```
