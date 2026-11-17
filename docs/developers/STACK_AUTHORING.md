@@ -310,10 +310,21 @@ never destroys the user's own work.
 
 ## Revise
 
-Upload the corrected package with the **same `slug`**. The Stack is updated in
-place: the same `template_id`, reset to Draft. A Stack that is in review or already in the
-Stack library cannot be replaced this way. Your installed copy then shows **Update
-available**; apply the update to bring it to the new version.
+Upload the corrected package with the **same `slug`**. What happens depends on where the
+Stack is:
+
+- **Draft or Rejected.** The Stack is updated in place: the same `template_id`, reset to
+  Draft. Your installed copy then shows **Update available**; apply the update to bring it
+  to the new version.
+- **In the Stack library.** The upload is kept as a **revision**, and the Stack everyone
+  installed stays exactly as it is. The upload answers with `revision_status: draft`. Send
+  the revision for review from the developer portal, the same way you sent the Stack. When
+  Conducktor approves it, the revision replaces the Stack in the library, and every
+  installed copy shows **Update available**. If Conducktor sends it back, the note tells you
+  what to change: upload again, then send again. The Builds the library version runs are
+  kept until a revision replaces it.
+- **In review.** A Stack, or a revision, that is waiting for a decision can't be replaced.
+  Upload again after the decision.
 
 ## Who can see your Stack
 
@@ -334,7 +345,8 @@ write stack.yaml (and any Builds, specialist files, knowledge files)
   → Install                                            Assistants hired and created, Flows and
                                                        knowledge added, Builds started, at once
                                                        or after guided setup
-  → upload again with the same slug                    revised in place
+  → upload again with the same slug                    revised in place (a library Stack:
+                                                       held as a revision for review)
   → uninstall                                          reversed, keeping the user's own edits
   → developer portal: Send for review                  reviewed, then added to the Stack library
 ```
