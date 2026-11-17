@@ -272,6 +272,9 @@ together once:
   same key in tables that get merged, one name used for different tables or values, and a
   view, function or trigger in a Build's database. After you change one of the Builds, the
   copy runs again on its own.
+- While the data is being moved, the Builds' data calls wait. If a move was interrupted,
+  they are refused until it is finished: the data store answers `503` with
+  `app_data_moving` and the database answers `busy`. Retry after a short wait.
 
 ### Limits
 
