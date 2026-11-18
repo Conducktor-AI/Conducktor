@@ -347,6 +347,30 @@ other answers `403` with code `not_declared`, and a connection nobody allowed an
 `not_granted`. Find what it may call with `services.granted_connectors()`, since its
 connection ids are the installer's, and handle an empty list.
 
+### Setup answers
+
+When your Stack asks setup questions (an `onboarding` step with `fields`, see Stack
+authoring), its Builds can read what the person answered: `services.setup_answers()` in
+Python, `setupAnswers()` in Next.js. The answer is keyed by step, then field, for example
+`{"business": {"stage": "idea", "focus": ["get_customers"]}}`. A Build reads only the
+answers its own installation gave, and gets an empty object before the person answers, or
+when no Stack installed it.
+
+### Context for Conducktor
+
+A Stack's Builds can tell Conducktor two things about the workspace by writing two keys in
+their data store. Conducktor reads them only from Stacks installed in that workspace, keeps
+only the fields below, shortens long text, and treats it as data, never as instructions.
+
+| Key | Value | Where it shows |
+|-----|-------|----------------|
+| `conducktor.brand` | `{"name", "tagline", "imagery", "mood", "avoid": [...], "voice", "colors": [{"name", "hex"}]}` | Images the workspace's assistants create follow it when the workspace has no brand of its own. |
+| `conducktor.canvas` | `{"sections": [{"heading", "text"}]}`, up to 9 sections | The workspace canvas shows each section under its heading, as plain text. |
+
+Every field is optional. `imagery` is the visual direction (up to 600 characters), `hex` is
+`#RRGGBB`, a heading is up to 80 characters and a section's text up to 1,500. Writing or
+deleting `conducktor.canvas` refreshes the canvas.
+
 ## Calling Claude models
 
 A Build can ask a Claude model for an answer through the platform service `ai`. It never

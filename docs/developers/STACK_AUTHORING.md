@@ -62,6 +62,9 @@ custom_flows:                            # your own Flows
 apps:                                    # Builds, pinned at upload
   - path: builds/invoice-api             # a Build folder in the same ZIP (see Stack package)
     uses_ai: true                        # optional; true = this Build calls Claude models
+    pages:                               # optional; more menu entries into this Build's page
+      - label: Overdue
+        path: "#overdue"
   - build_id: "8f0c2d4e-…"               # or a succeeded, launched Build you already have
 
 knowledge:                               # put in the workspace's Drive on install
@@ -107,11 +110,11 @@ pricing:
 | `roster_required` | — | Slugs from `roster` the installer may not deselect. Each must also be in `roster`. |
 | `specialists` | — | **New** Assistants you define, created in the installing workspace (see [Specialists](#specialists)) |
 | `custom_flows` | — | Your own **Flows**, one per entry, named by its `name`: installed on the specialist an entry names with `specialist: <slug>` (one of this Stack's `specialists`), otherwise on Conducktor's Flows tab. Fields are listed in [Stack package § Flows](STACK_PACKAGE.md#flows). Up to 100; each definition at most 64 KB serialized. Keys at most 100 characters; each needs a `name` (at most 255 characters); optional `slug` at most 128 characters. A Flow whose name is already taken on its tab by a Flow that is not this Stack's, whose tools are not in the workspace, or whose inputs a Flow cannot take is reported as unavailable on the install, not overwritten. A reinstall refreshes this Stack's Flows in place unless you edited one. `skills` is the older name for this section and is still accepted; a manifest with both is refused. |
-| `apps` | — | Builds, pinned at upload (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{path: builds/<folder>}` for a Build in the same package (only inside a ZIP), or `{build_id: <id>}` for one you already have. Up to 20; a Build listed twice is rejected. Set `uses_ai: true` on an entry whose Build calls Claude models (see [Runtime contract § AI](APP_RUNTIME.md#who-pays)); default `false`, and anything but `true` or `false` is rejected. |
+| `apps` | — | Builds, pinned at upload (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{path: builds/<folder>}` for a Build in the same package (only inside a ZIP), or `{build_id: <id>}` for one you already have, with optional `pages` (see [Menu pages](#menu-pages)). Up to 20; a Build listed twice is rejected. Set `uses_ai: true` on an entry whose Build calls Claude models (see [Runtime contract § AI](APP_RUNTIME.md#who-pays)); default `false`, and anything but `true` or `false` is rejected. |
 | `knowledge` | — | Text documents put in the installing workspace's Drive (see [Knowledge](#knowledge)) |
 | `pipeline` | — | How documents in your Stack's corpus are processed (see [Corpus processing pipeline](#corpus-processing-pipeline)). Needs `roster_required` or `specialists`. |
 | `flows` | — | Conducktor Flow slugs. Each must be an **existing, active** Conducktor Flow; an unknown slug is rejected with `422`. |
-| `onboarding` | — | Guided-setup steps. A step's `required_connectors` must be existing Conducktor connector slugs (unknown ones are rejected with `422`). The setup runs only when at least one step lists connectors; the install happens at the **last** such step, once every listed connector is connected. Steps without connectors are informational. |
+| `onboarding` | — | Guided-setup steps. A step's `required_connectors` must be existing Conducktor connector slugs (unknown ones are rejected with `422`). The setup runs only when at least one step lists connectors; the install happens at the **last** such step, once every listed connector is connected. A step with `fields` (and a `key`) is a **questions step**: setup shows it as a form of up to 20 `text`, `choice` or `multi_choice` fields, and your Stack's Builds read the answers with `services.setup_answers()` (App runtime, Setup answers). Other steps without connectors are informational. |
 | `pricing.price_cents` | — | Optional. Must be `0`: a Stack has no purchase price, and a nonzero value is rejected. How published Stacks earn is described at <https://www.conducktor.com/developers>. |
 
 ### Builds in a Stack
@@ -141,6 +144,25 @@ On install, each Build is **started** in the installing workspace from the pinne
 and its OpenAPI operations are registered as tools on the Stack's connector. A Build that
 cannot be started is reported on the install, with a reason, and the rest of the
 install continues.
+
+#### Menu pages
+
+A Build whose root (`/`) serves a web page is an entry in the Stack's menu, named after the
+Build. To give one Build more entries, list `pages` on its `apps` entry: each has a `label`
+(1 to 40 characters) and a `path`, a place in the Build's own page written as a URL
+fragment (`#` then up to 40 letters, digits, `-` or `_`). The entry opens the Build's page
+with that fragment, so your page reads `location.hash` (and listens for `hashchange`) to
+show the right view. Up to 8 pages per Build; a path listed twice is rejected.
+
+```yaml
+apps:
+  - path: builds/company
+    pages:
+      - label: Roadmap
+        path: "#roadmap"
+      - label: Brand
+        path: "#brand"
+```
 
 ### Knowledge
 
