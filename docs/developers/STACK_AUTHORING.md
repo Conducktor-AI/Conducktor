@@ -326,6 +326,15 @@ Stack is:
 - **In review.** A Stack, or a revision, that is waiting for a decision can't be replaced.
   Upload again after the decision.
 
+An Update carries what your specialists say (their name, role, description, instructions,
+expertise and Skills) onto the Assistants an install already has, and adds any specialist
+you add. A field the user edited on their Assistant keeps their edit. It also carries what
+your setup steps say. Some changes can't be applied to a copy already installed, and the
+installed copy then says the version can't be applied: removing a specialist, changing a
+specialist's `slug` or `knowledge`, or adding or changing a setup step the user acts on (a
+step with questions, or a connector a step asks for). Keep those as they are in a revision
+you want installed copies to take.
+
 ## Who can see your Stack
 
 A Stack you upload is **private to your workspace**, and you can use it there with no
