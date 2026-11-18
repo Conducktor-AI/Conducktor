@@ -460,11 +460,13 @@ used.
 
 When another workspace installs your Stack, its copy of your Build calls models the same
 way, paid from **the installing workspace's** Credits and held to the daily limit that
-workspace sets on the Stack's page. AI is **off** in an installed copy until a member of
-the installing workspace turns on **Let this Stack's Builds use AI** on the Stack's page,
-which shows the cost and the daily limit. Until then `ai.complete` answers
-`403 not_allowed`, so handle that answer in your app. They can turn it off again at any
-time.
+workspace sets on the Stack's page. Declare it with `uses_ai: true` on the Build's `apps`
+entry in `stack.yaml` (see [Stack authoring § Builds in a Stack](STACK_AUTHORING.md#builds-in-a-stack)):
+only a Build that declares it can call AI once installed. AI is **on** in an installed copy
+of such a Build, held to the Stack's daily limit, and a member of the installing workspace
+can turn off **Let this Stack's Builds use AI** on the Stack's page at any time. While it is
+off, `ai.complete` answers `403 not_allowed`, so handle that answer in your app. A copy of a
+Build that did not declare AI has no AI at all: its calls answer `401 unauthenticated`.
 
 ### Limits
 

@@ -226,6 +226,7 @@ Each folder under `builds/` is a complete Build package, laid out exactly as the
 ```yaml
 apps:
   - path: builds/invoice-api
+    uses_ai: true        # only if this Build calls Claude models
 ```
 
 Each folder needs a runtime Conducktor can detect from its files (see
@@ -287,6 +288,7 @@ Put nothing in knowledge that you do not want the installer to read.
 - [ ] Each Skill's `description` says plainly which requests it fits.
 - [ ] Each Flow names its `specialist`, and every tool it lists is served by one of your
       Builds or by a connector in `connectors.required`.
+- [ ] Each Build that calls Claude models has `uses_ai: true` on its `apps` entry.
 - [ ] Each Build folder launches on its own as a Build (see
       [Getting started](GETTING_STARTED.md)).
 - [ ] Nothing in the package holds a secret, a token or personal data.

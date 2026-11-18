@@ -61,6 +61,7 @@ custom_flows:                            # your own Flows
 
 apps:                                    # Builds, pinned at upload
   - path: builds/invoice-api             # a Build folder in the same ZIP (see Stack package)
+    uses_ai: true                        # optional; true = this Build calls Claude models
   - build_id: "8f0c2d4e-…"               # or a succeeded, launched Build you already have
 
 knowledge:                               # put in the workspace's Drive on install
@@ -106,7 +107,7 @@ pricing:
 | `roster_required` | — | Slugs from `roster` the installer may not deselect. Each must also be in `roster`. |
 | `specialists` | — | **New** Assistants you define, created in the installing workspace (see [Specialists](#specialists)) |
 | `custom_flows` | — | Your own **Flows**, one per entry, named by its `name`: installed on the specialist an entry names with `specialist: <slug>` (one of this Stack's `specialists`), otherwise on Conducktor's Flows tab. Fields are listed in [Stack package § Flows](STACK_PACKAGE.md#flows). Up to 100; each definition at most 64 KB serialized. Keys at most 100 characters; each needs a `name` (at most 255 characters); optional `slug` at most 128 characters. A Flow whose name is already taken on its tab by a Flow that is not this Stack's, whose tools are not in the workspace, or whose inputs a Flow cannot take is reported as unavailable on the install, not overwritten. A reinstall refreshes this Stack's Flows in place unless you edited one. `skills` is the older name for this section and is still accepted; a manifest with both is refused. |
-| `apps` | — | Builds, pinned at upload (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{path: builds/<folder>}` for a Build in the same package (only inside a ZIP), or `{build_id: <id>}` for one you already have. Up to 20; a Build listed twice is rejected. |
+| `apps` | — | Builds, pinned at upload (see [Builds in a Stack](#builds-in-a-stack)). Each entry is `{path: builds/<folder>}` for a Build in the same package (only inside a ZIP), or `{build_id: <id>}` for one you already have. Up to 20; a Build listed twice is rejected. Set `uses_ai: true` on an entry whose Build calls Claude models (see [Runtime contract § AI](APP_RUNTIME.md#who-pays)); default `false`, and anything but `true` or `false` is rejected. |
 | `knowledge` | — | Text documents put in the installing workspace's Drive (see [Knowledge](#knowledge)) |
 | `pipeline` | — | How documents in your Stack's corpus are processed (see [Corpus processing pipeline](#corpus-processing-pipeline)). Needs `roster_required` or `specialists`. |
 | `flows` | — | Conducktor Flow slugs. Each must be an **existing, active** Conducktor Flow; an unknown slug is rejected with `422`. |
@@ -129,6 +130,12 @@ upload the manifest, each such Build must:
 Otherwise the manifest is rejected with `422` saying which condition failed. The Stack pins
 exactly that Build's image: later changes to the Build do not reach installs until you upload
 the manifest again.
+
+**AI.** A Build that calls Claude models through the `ai` platform service must say so with
+`uses_ai: true` on its entry. Only those Builds can call AI once installed, and the
+installing workspace sees the Stack's **AI limit** (its daily AI budget) only when at least
+one Build declares it. In an installed copy of a Build without it, `ai.complete` answers
+`401 unauthenticated` (its token does not carry AI). Conducktor's review sees the declaration.
 
 On install, each Build is **started** in the installing workspace from the pinned image,
 and its OpenAPI operations are registered as tools on the Stack's connector. A Build that
