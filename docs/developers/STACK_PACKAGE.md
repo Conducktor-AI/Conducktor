@@ -49,7 +49,7 @@ freelance-designer.zip
 │               └── SKILL.md
 ├── flows/
 │   └── weekly-brand-report/             optional: one folder per Flow, named by its key
-│       └── instructions.md
+│       └── instructions.md              or step-1.md, step-2.md ... for a Flow with steps
 ├── knowledge/
 │   └── brand/voice.md                   one file per knowledge document
 └── builds/
@@ -180,12 +180,46 @@ custom_flows:
 | `slug` | — | Up to 128 characters |
 | `description` | — | What the Flow does |
 | `specialist` | — | The `slug` of one of the package's specialists. The Flow installs on that Assistant. Without it, the Flow installs on Conducktor's own Flows tab. |
-| `instructions` | — | What the Assistant does when the Flow runs, inline or in `flows/<key>/instructions.md` (the folder holds only that file). Defaults to the description. |
+| `instructions` | — | What the Assistant does when the Flow runs, inline or in `flows/<key>/instructions.md` (the folder holds only that file). Defaults to the description. A Flow with `steps` has none. |
+| `steps` | — | The Flow's steps, run in order, up to 10. See [Flows with steps](#flows-with-steps). A Flow with steps sets no `instructions` or `tools` of its own. |
 | `inputs` | — | A JSON Schema object for what the user fills in when they run it |
 | `tools` | — | Tool names the Flow needs, including your Builds' operations. A tool the workspace does not have makes the Flow unavailable on install, with the reason. |
 | `outputs.description` | — | What it produces |
 | `outputs.saves_document` | — | `true` to save the result to Drive |
 | `tags` | — | Labels |
+
+#### Flows with steps
+
+A Flow can run as several steps, each done by its own Assistant. A step is done by the
+Flow's `specialist` unless it names another `assistant`: one of the package's
+specialists, or an Assistant in `roster_required` that the Stack hires on install. A hired
+Assistant does its step itself, unattended, with its own grants and at its own autonomy
+level, so its step lists no `tools`. A later step reads an earlier step's answer as
+`{{step-N.result}}`.
+
+```yaml
+custom_flows:
+  apply-for-a-grant:
+    name: Apply for a grant
+    specialist: grant-writer
+    inputs: { type: object, properties: { url: { type: string } }, required: [url] }
+    steps:
+      - title: Write the brief              # instructions in flows/apply-for-a-grant/step-1.md
+        tools: [get_profile]
+      - title: Fill in the form
+        assistant: forms-assistant          # in roster_required
+        instructions: "Fill in and submit the form from this brief: {{step-1.result}}"
+      - title: Record it
+        instructions: "Record what this report says was sent: {{step-2.result}}"
+        tools: [record_submission]
+```
+
+| Step field | Required | Meaning |
+|------------|----------|---------|
+| `instructions` | ✅ | What the step's Assistant does, inline or in `flows/<key>/step-N.md` (N from 1). The Flow's `inputs` are read as `{input.<name>}`; put them in the first step. |
+| `title` | — | Up to 120 characters. Defaults to the Flow's name and the step's number. |
+| `assistant` | — | A specialist's `slug`, or an Assistant in `roster_required`. One the install did not hire makes the Flow unavailable, with the reason. |
+| `tools` | — | Tools the step needs, as a Flow's `tools`. Not on a hired Assistant's step. |
 
 Up to 100 Flows per Stack, each at most 64 KB. (`skills` is the older name for
 `custom_flows` and is still accepted; a manifest with both is refused.) A Build can also declare scheduled jobs and
@@ -241,7 +275,8 @@ a package. An `apps` entry can instead name a Build you already have by `build_i
 - **Declared once.** Text set both inline in `stack.yaml` and in a file is refused, naming
   both.
 - **Nothing orphaned.** A folder under `specialists/` that no specialist names, a folder
-  under `flows/` that `custom_flows` does not declare, a file
+  under `flows/` that `custom_flows` does not declare, a `step-N.md` for a step the Flow
+  does not have, a file
   under `knowledge/` that no entry names, and a folder under `builds/` that `apps` does
   not list are each refused.
 - **Paths.** Relative only: no absolute paths, no `..`, no symbolic links.
