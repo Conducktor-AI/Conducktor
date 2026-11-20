@@ -260,6 +260,7 @@ Each folder under `builds/` is a complete Build package, laid out exactly as the
 ```yaml
 apps:
   - path: builds/invoice-api
+    name: Invoice API    # optional; the Build's name exactly as written
     uses_ai: true        # only if this Build calls Claude models
 ```
 
