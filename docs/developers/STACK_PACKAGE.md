@@ -262,6 +262,7 @@ apps:
   - path: builds/invoice-api
     name: Invoice API    # optional; the Build's name exactly as written
     uses_ai: true        # only if this Build calls Claude models
+    uses_files: true     # only if this Build reads or saves files in the installer's Drive
 ```
 
 Each folder needs a runtime Conducktor can detect from its files (see
@@ -325,6 +326,8 @@ Put nothing in knowledge that you do not want the installer to read.
 - [ ] Each Flow names its `specialist`, and every tool it lists is served by one of your
       Builds or by a connector in `connectors.required`.
 - [ ] Each Build that calls Claude models has `uses_ai: true` on its `apps` entry.
+- [ ] Each Build that reads or saves the installer's files has `uses_files: true` on its
+      `apps` entry. Without it, an installed copy has no Drive access and no folder of its own.
 - [ ] Each Build folder launches on its own as a Build (see
       [Getting started](GETTING_STARTED.md)).
 - [ ] Nothing in the package holds a secret, a token or personal data.
