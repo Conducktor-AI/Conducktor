@@ -261,6 +261,7 @@ Each folder under `builds/` is a complete Build package, laid out exactly as the
 apps:
   - path: builds/invoice-api
     name: Invoice API    # optional; the Build's name exactly as written
+    id: invoice-api      # the Build's fixed id; keep it the same in every version
     uses_ai: true        # only if this Build calls Claude models
     uses_files: true     # only if this Build reads or saves files in the installer's Drive
 ```
@@ -299,6 +300,11 @@ the package are built afresh, and the previous upload's Builds are removed once 
 revised Stack is saved. A Stack that is in review or in the Stack library cannot be replaced
 this way.
 
+A Build whose `apps` entry keeps the same `id` stays the same Build: an installed copy's
+Update keeps its connection and points it at the new Build, so Flows and grants that use it
+keep working. A Build without an `id`, or whose `id` changed, gets a new connection, and so
+does one that another Stack in the same workspace also runs.
+
 ## What an installing workspace sees
 
 Your Assistants' know-how is yours. The people who install your Stack use it; they do
@@ -328,6 +334,8 @@ Put nothing in knowledge that you do not want the installer to read.
 - [ ] Each Build that calls Claude models has `uses_ai: true` on its `apps` entry.
 - [ ] Each Build that reads or saves the installer's files has `uses_files: true` on its
       `apps` entry. Without it, an installed copy has no Drive access and no folder of its own.
+- [ ] Each Build has an `id` on its `apps` entry, the same as in your last upload, so
+      installed copies keep its connection when they update.
 - [ ] Each Build folder launches on its own as a Build (see
       [Getting started](GETTING_STARTED.md)).
 - [ ] Nothing in the package holds a secret, a token or personal data.
