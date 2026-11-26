@@ -679,6 +679,48 @@ for p in services.knowledge_search("refund policy for annual plans", limit=5)["p
 | `403` | `not_permitted` | `folder_id` is not one the Build may read |
 | `402` | `insufficient_credits` | The workspace has no Credits left or is past its spending cap |
 
+## The workspace's AI inventory
+
+A Build can read which assistants its workspace runs and what each may use, for example to
+keep an AI-use register. It is read only, and it holds names and settings only: never a
+password, a key, an assistant's instructions or a conversation. It starts **off**: a member
+turns it on, on the Build's permissions or, for an installed copy of a Stack's Build, on the
+Stack's page (declare it with `uses_inventory: true`, see
+[Stack package § Builds](STACK_PACKAGE.md#builds)).
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST $CONDUCKTOR_APP_SERVICES_URL/inventory/inventory.read` | `{ "arguments": {} }` → `{ "result": { "default_model", "assistants", "connections", "flows", "stacks", "truncated" } }` |
+
+- `default_model` is the chat model the workspace picked, or `null` when it picked none
+  (the platform's default runs).
+- Each of `assistants` has `slug`, `name`, `role`, `department`, `level`, `autonomy`
+  (`manual`, `supervised` or `auto`), `model` (its own chat model pick; `null` when it uses
+  the workspace's), `status`, `active`, `origin` (`catalog`, `stack` or `workspace`), `stack` (the
+  Stack that added it, `{ "name", "slug" }`, or `null`), `hired_at`, `tasks` (`total`,
+  `succeeded`, `failed`), `tools` (the platform tools it may use) and `connection_ids` (the
+  workspace connections it may reach).
+- Each of `connections` has `connection_id`, `name`, `connector` (the catalog connector, or
+  `null` for a custom one) and `status`.
+- Each of `flows` has `id`, `name`, `owner` (the owning assistant's `slug`, or `null`) and
+  `active`; each of `stacks` has `name`, `slug` and `status`.
+- At most 200 assistants, 500 connections, 500 Flows and 100 Stacks; `truncated` is `true`
+  when the workspace has more.
+- A Build that can read the inventory cannot be shared publicly while it is on.
+
+```python
+from conducktor_app import services
+
+inv = services.inventory_read()
+for a in inv["assistants"]:
+    print(a["name"], a["autonomy"], a["model"] or inv["default_model"] or "default")
+```
+
+| Status | `code` | What it means |
+|--------|--------|---------------|
+| `403` | `not_allowed` | Off: nobody has turned it on for this Build yet, or a member turned it off. Tell the person where to turn it on |
+| `403` | `service_off` | The inventory is turned off on the platform |
+
 ## A browser of its own
 
 A Build can open public web pages in a headless browser: read a page after its scripts

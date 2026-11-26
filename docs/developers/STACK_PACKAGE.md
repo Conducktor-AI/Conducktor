@@ -264,6 +264,7 @@ apps:
     id: invoice-api      # the Build's fixed id; keep it the same in every version
     uses_ai: true        # only if this Build calls Claude models
     uses_files: true     # only if this Build reads or saves files in the installer's Drive
+    uses_inventory: true # only if this Build reads which assistants the installer runs
 ```
 
 Each folder needs a runtime Conducktor can detect from its files (see
@@ -334,6 +335,9 @@ Put nothing in knowledge that you do not want the installer to read.
 - [ ] Each Build that calls Claude models has `uses_ai: true` on its `apps` entry.
 - [ ] Each Build that reads or saves the installer's files has `uses_files: true` on its
       `apps` entry. Without it, an installed copy has no Drive access and no folder of its own.
+- [ ] Each Build that reads which assistants the installer runs has `uses_inventory: true`
+      on its `apps` entry. It starts off in each installing workspace: tell installers, in
+      your onboarding, to turn it on on the Stack's page.
 - [ ] Each Build has an `id` on its `apps` entry, the same as in your last upload, so
       installed copies keep its connection when they update.
 - [ ] Each Build folder launches on its own as a Build (see
